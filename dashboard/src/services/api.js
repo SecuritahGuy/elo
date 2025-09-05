@@ -82,7 +82,7 @@ export const apiService = {
 
   // ELO Ratings endpoints
   getEloSeasons: () => api.get('/api/elo/seasons'),
-  getEloRatings: (season = 2024, config = 'baseline') =>
+  getEloRatings: (season = 2024, config = 'comprehensive') =>
     api.get(`/api/elo/ratings?season=${season}&config=${config}`),
   getTeamEloHistory: (team, seasons = [2020, 2021, 2022, 2023, 2024]) => {
     const seasonParams = seasons.map(s => `seasons=${s}`).join('&');

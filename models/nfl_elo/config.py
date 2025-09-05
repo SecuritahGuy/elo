@@ -12,7 +12,7 @@ class EloConfig(BaseModel):
     k: float = Field(default=20.0, description="K-factor for rating updates")
     scale: float = Field(default=400.0, description="Logistic scale in Elo expectation")
     hfa_points: float = Field(default=55.0, description="Home field advantage in rating points")
-    preseason_regress: float = Field(default=0.75, description="Preseason regression factor (75% carry-over)")
+    preseason_regress: float = Field(default=0.30, description="Preseason regression factor (30% carry-over)")
     mov_enabled: bool = Field(default=True, description="Enable margin of victory multiplier")
     qb_adj_weight: float = Field(default=0.0, description="QB adjustment weight in points")
     rest_per_day_pts: float = Field(default=1.0, description="Rest advantage per extra rest day")
@@ -28,7 +28,7 @@ class EloConfig(BaseModel):
     offdef_scale: float = Field(default=30.0, description="Logistic scale for off/def point expectations")
 
     # Backtest parameters
-    start_season: int = Field(default=2010, description="Starting season for backtesting")
+    start_season: int = Field(default=2021, description="Starting season for backtesting")
     end_season: int = Field(default=2024, description="Ending season for backtesting")
     seed: int = Field(default=42, description="Random seed for reproducibility")
 

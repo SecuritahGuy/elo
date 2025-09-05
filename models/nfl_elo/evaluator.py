@@ -47,6 +47,15 @@ def log_loss_score(probs: np.ndarray, outcomes: np.ndarray) -> float:
     # Clip probabilities to avoid log(0)
     probs_clipped = np.clip(probs, 1e-15, 1 - 1e-15)
     
+    # Handle case where all outcomes are the same
+    unique_outcomes = np.unique(outcomes)
+    if len(unique_outcomes) == 1:
+        # If all outcomes are the same, use manual calculation
+        if unique_outcomes[0] == 1:
+            return -np.mean(np.log(probs_clipped))
+        else:
+            return -np.mean(np.log(1 - probs_clipped))
+    
     return log_loss(outcomes, probs_clipped)
 
 

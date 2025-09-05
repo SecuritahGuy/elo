@@ -100,7 +100,7 @@ export const enhancedApiService = {
     });
   },
 
-  getEloRatings: (season = 2024, config = 'baseline') => {
+  getEloRatings: (season = 2024, config = 'comprehensive') => {
     const cacheKey = cacheService.generateKey('elo', 'ratings', season, config);
     const cached = cacheService.get(cacheKey);
     

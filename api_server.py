@@ -410,7 +410,7 @@ def recalculate_elo_ratings():
         
         # Get the project root directory
         project_root = os.path.dirname(os.path.abspath(__file__))
-        script_path = os.path.join(project_root, 'calculate_real_elo_ratings.py')
+        script_path = os.path.join(project_root, 'calculate_proper_elo_ratings.py')
         
         # Check if script exists
         if not os.path.exists(script_path):

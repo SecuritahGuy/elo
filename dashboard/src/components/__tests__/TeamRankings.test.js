@@ -18,10 +18,10 @@ const renderWithRouter = (component) => {
 
 describe('TeamRankings Component', () => {
   const mockRankings = [
-    { team: 'PHI', rating: 1765.2, rank: 1, wins: 0, losses: 0, win_pct: 0.0, change: 0.0 },
-    { team: 'BUF', rating: 1724.3, rank: 2, wins: 0, losses: 0, win_pct: 0.0, change: 0.0 },
-    { team: 'BAL', rating: 1722.3, rank: 3, wins: 0, losses: 0, win_pct: 0.0, change: 0.0 }
-  ];
+  { team: 'PHI', rating: 1765.1, rank: 1, wins: 59, losses: 35, win_pct: 0.628, change: 10.0 },
+  { team: 'BUF', rating: 1724.4, rank: 2, wins: 68, losses: 27, win_pct: 0.716, change: 0.0 },
+  { team: 'BAL', rating: 1721.9, rank: 3, wins: 57, losses: 34, win_pct: 0.626, change: 0.0 }
+];
 
   const mockSeasons = [2024, 2025];
 
@@ -75,7 +75,7 @@ describe('TeamRankings Component', () => {
     renderWithRouter(<TeamRankings />);
 
     await waitFor(() => {
-      expect(screen.getByText('0-0')).toBeInTheDocument();
+      expect(screen.getByText('59-35')).toBeInTheDocument();
     });
   });
 
@@ -87,7 +87,7 @@ describe('TeamRankings Component', () => {
     renderWithRouter(<TeamRankings />);
 
     await waitFor(() => {
-      expect(screen.getByText('0')).toBeInTheDocument();
+      expect(screen.getByText('+10.0')).toBeInTheDocument();
     });
   });
 
@@ -108,7 +108,7 @@ describe('TeamRankings Component', () => {
     fireEvent.change(seasonSelect, { target: { value: '2025' } });
 
     await waitFor(() => {
-      expect(apiService.getEloRatings).toHaveBeenCalledWith(2025, 'baseline');
+      expect(apiService.getEloRatings).toHaveBeenCalledWith(2025, 'comprehensive');
     });
   });
 
@@ -120,12 +120,12 @@ describe('TeamRankings Component', () => {
     renderWithRouter(<TeamRankings />);
 
     await waitFor(() => {
-      const configSelect = screen.getByDisplayValue('baseline');
+      const configSelect = screen.getByDisplayValue('comprehensive');
       expect(configSelect).toBeInTheDocument();
     });
 
     // Change configuration
-    const configSelect = screen.getByDisplayValue('baseline');
+    const configSelect = screen.getByDisplayValue('comprehensive');
     fireEvent.change(configSelect, { target: { value: 'weather_only' } });
 
     await waitFor(() => {

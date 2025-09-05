@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1757098792542" clover="3.2.0">
-  <project timestamp="1757098792543" name="All files">
-    <metrics statements="1049" coveredstatements="57" conditionals="722" coveredconditionals="30" methods="311" coveredmethods="12" elements="2082" coveredelements="99" complexity="0" loc="1049" ncloc="1049" packages="4" files="21" classes="21"/>
+<coverage generated="1757099394707" clover="3.2.0">
+  <project timestamp="1757099394707" name="All files">
+    <metrics statements="1049" coveredstatements="57" conditionals="722" coveredconditionals="33" methods="311" coveredmethods="12" elements="2082" coveredelements="102" complexity="0" loc="1049" ncloc="1049" packages="4" files="21" classes="21"/>
     <package name="src">
       <metrics statements="22" coveredstatements="0" conditionals="4" coveredconditionals="0" methods="4" coveredmethods="0"/>
       <file name="App.js" path="/Users/tim/Code/Personal/SportsEdge/dashboard/src/App.js">
@@ -34,7 +34,7 @@
       </file>
     </package>
     <package name="src.components">
-      <metrics statements="802" coveredstatements="52" conditionals="625" coveredconditionals="28" methods="221" coveredmethods="12"/>
+      <metrics statements="802" coveredstatements="52" conditionals="625" coveredconditionals="31" methods="221" coveredmethods="12"/>
       <file name="CronStatus.js" path="/Users/tim/Code/Personal/SportsEdge/dashboard/src/components/CronStatus.js">
         <metrics statements="47" coveredstatements="0" conditionals="32" coveredconditionals="0" methods="10" coveredmethods="0"/>
         <line num="15" count="0" type="stmt"/>
@@ -820,7 +820,7 @@
         <line num="443" count="0" type="cond" truecount="0" falsecount="2"/>
       </file>
       <file name="TeamRankings.js" path="/Users/tim/Code/Personal/SportsEdge/dashboard/src/components/TeamRankings.js">
-        <metrics statements="60" coveredstatements="52" conditionals="43" coveredconditionals="28" methods="14" coveredmethods="12"/>
+        <metrics statements="60" coveredstatements="52" conditionals="43" coveredconditionals="31" methods="14" coveredmethods="12"/>
         <line num="6" count="1" type="stmt"/>
         <line num="7" count="38" type="stmt"/>
         <line num="8" count="37" type="stmt"/>
@@ -866,13 +866,13 @@
         <line num="75" count="0" type="cond" truecount="0" falsecount="2"/>
         <line num="76" count="0" type="stmt"/>
         <line num="79" count="37" type="stmt"/>
-        <line num="80" count="24" type="cond" truecount="1" falsecount="1"/>
-        <line num="81" count="24" type="cond" truecount="1" falsecount="1"/>
-        <line num="82" count="24" type="stmt"/>
+        <line num="80" count="24" type="cond" truecount="2" falsecount="0"/>
+        <line num="81" count="16" type="cond" truecount="1" falsecount="1"/>
+        <line num="82" count="16" type="stmt"/>
         <line num="85" count="37" type="stmt"/>
-        <line num="86" count="24" type="cond" truecount="1" falsecount="1"/>
-        <line num="87" count="24" type="cond" truecount="1" falsecount="1"/>
-        <line num="88" count="24" type="stmt"/>
+        <line num="86" count="24" type="cond" truecount="2" falsecount="0"/>
+        <line num="87" count="16" type="cond" truecount="1" falsecount="1"/>
+        <line num="88" count="16" type="stmt"/>
         <line num="91" count="37" type="cond" truecount="2" falsecount="0"/>
         <line num="92" count="27" type="stmt"/>
         <line num="100" count="10" type="stmt"/>

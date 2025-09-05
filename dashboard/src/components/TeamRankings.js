@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import apiService from '../services/api';
-import { Trophy, TrendingUp, TrendingDown, Calendar, RefreshCw, BarChart3, ExternalLink } from 'lucide-react';
+import { Trophy, TrendingUp, TrendingDown, Calendar, BarChart3, ExternalLink } from 'lucide-react';
 
 const TeamRankings = () => {
   const navigate = useNavigate();
@@ -119,13 +119,6 @@ const TeamRankings = () => {
               ))}
             </select>
           </div>
-          <button
-            onClick={() => loadRankingsData()}
-            className="flex items-center px-4 py-2 bg-nfl-primary text-white rounded-lg hover:bg-nfl-secondary transition-colors"
-          >
-            <RefreshCw className="w-4 h-4 mr-2" />
-            Refresh
-          </button>
         </div>
       </div>
 
