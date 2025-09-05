@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Activity, Settings, RefreshCw, CheckCircle, XCircle, AlertTriangle } from 'lucide-react';
-import { apiService } from '../services/api';
+import apiService from '../services/api';
 
 const SystemStatus = () => {
   const [systemStatus, setSystemStatus] = useState(null);

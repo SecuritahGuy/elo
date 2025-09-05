@@ -10,7 +10,7 @@ import {
   Calendar,
   Timer
 } from 'lucide-react';
-import { apiService } from '../services/api';
+import apiService from '../services/api';
 
 const CronStatus = () => {
   const [cronData, setCronData] = useState(null);

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { BarChart3, TrendingUp, Activity, Target, RefreshCw } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
-import { apiService } from '../services/api';
+import apiService from '../services/api';
 
 const Performance = () => {
   const [metrics, setMetrics] = useState(null);

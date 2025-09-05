@@ -94,6 +94,21 @@ export const apiService = {
     const teamParams = teams.map(t => `teams=${t}`).join('&');
     return api.get(`/api/elo/compare?${teamParams}&season=${season}`);
   },
+
+  // Injury Data endpoints
+  getTeamInjuries: (season = 2025, week = 1) =>
+    api.get(`/api/injuries/teams?season=${season}&week=${week}`),
+  getTeamInjuryHistory: (team, season = 2025, weeks = []) => {
+    const weekParams = weeks.length > 0 ? weeks.map(w => `weeks=${w}`).join('&') : '';
+    return api.get(`/api/injuries/team/${team}?season=${season}&${weekParams}`);
+  },
+  getPlayerInjuries: (season = 2025, week = 1, team = null) => {
+    const params = new URLSearchParams({ season, week });
+    if (team) params.append('team', team);
+    return api.get(`/api/injuries/players?${params}`);
+  },
+  getInjurySummary: (season = 2025) =>
+    api.get(`/api/injuries/summary?season=${season}`),
 };
 
-export default api;
+export default apiService;

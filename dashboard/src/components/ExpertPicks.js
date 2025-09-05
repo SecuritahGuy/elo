@@ -14,7 +14,7 @@ import {
   Trophy,
   BarChart3
 } from 'lucide-react';
-import { apiService } from '../services/api';
+import apiService from '../services/api';
 
 const ExpertPicks = () => {
   const [experts, setExperts] = useState([]);

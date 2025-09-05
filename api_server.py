@@ -16,6 +16,9 @@ from ingest.action_network.team_mapper import ActionNetworkTeamMapper
 # Import ELO components
 from ingest.nfl.elo_data_service import EloDataService
 
+# Import injury components
+from models.nfl_elo.injury_integration import InjuryImpactCalculator
+
 app = Flask(__name__)
 CORS(app)
 
@@ -27,6 +30,7 @@ logger = logging.getLogger(__name__)
 analyzer = ActionNetworkAnalyzer()
 team_mapper = ActionNetworkTeamMapper()
 elo_service = EloDataService()
+injury_calculator = InjuryImpactCalculator()
 
 @app.route('/api/system/status', methods=['GET'])
 def get_system_status():
@@ -551,6 +555,177 @@ def get_week_predictions(week):
         'week': week,
         'message': 'Use Action Network picks endpoint for prediction data'
     })
+
+
+# Injury Data Endpoints
+@app.route('/api/injuries/teams', methods=['GET'])
+def get_team_injuries():
+    """Get injury data for all teams for a specific week."""
+    try:
+        season = request.args.get('season', 2025, type=int)
+        week = request.args.get('week', 1, type=int)
+        
+        # Load injury data
+        injuries = injury_calculator.load_injury_data([season])
+        
+        # Filter by week
+        week_injuries = injuries[injuries['week'] == week].copy()
+        
+        # Group by team and calculate injury summary
+        team_injuries = []
+        for team in week_injuries['team'].unique():
+            team_data = week_injuries[week_injuries['team'] == team]
+            
+            # Count injury types
+            injury_counts = team_data['report_primary_injury'].value_counts().to_dict()
+            
+            # Count status types
+            status_counts = team_data['report_status'].value_counts().to_dict()
+            
+            team_injuries.append({
+                'team': team,
+                'total_injuries': len(team_data),
+                'injury_breakdown': injury_counts,
+                'status_breakdown': status_counts,
+                'key_players': team_data[['full_name', 'position', 'report_primary_injury', 'report_status']].to_dict('records')
+            })
+        
+        return jsonify({
+            'season': season,
+            'week': week,
+            'teams': team_injuries,
+            'total_injuries': len(week_injuries)
+        })
+        
+    except Exception as e:
+        logger.error(f"Error getting team injuries: {e}")
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/injuries/team/<team>', methods=['GET'])
+def get_team_injury_history(team):
+    """Get injury history for a specific team."""
+    try:
+        season = request.args.get('season', 2025, type=int)
+        weeks = request.args.getlist('weeks', type=int)
+        
+        if not weeks:
+            weeks = list(range(1, 19))  # All regular season weeks
+        
+        # Load injury data
+        injuries = injury_calculator.load_injury_data([season])
+        
+        # Filter by team and weeks
+        team_injuries = injuries[
+            (injuries['team'] == team) & 
+            (injuries['week'].isin(weeks))
+        ].copy()
+        
+        # Process weekly injury data
+        weekly_data = []
+        for week in weeks:
+            week_data = team_injuries[team_injuries['week'] == week]
+            
+            weekly_data.append({
+                'week': week,
+                'total_injuries': len(week_data),
+                'injuries': week_data[['full_name', 'position', 'report_primary_injury', 'report_status']].to_dict('records')
+            })
+        
+        return jsonify({
+            'team': team,
+            'season': season,
+            'weeks': weekly_data,
+            'total_injuries': len(team_injuries)
+        })
+        
+    except Exception as e:
+        logger.error(f"Error getting team injury history: {e}")
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/injuries/players', methods=['GET'])
+def get_player_injuries():
+    """Get injury data for specific players."""
+    try:
+        season = request.args.get('season', 2025, type=int)
+        week = request.args.get('week', 1, type=int)
+        team = request.args.get('team', None)
+        
+        # Load injury data
+        injuries = injury_calculator.load_injury_data([season])
+        
+        # Filter data
+        filtered_injuries = injuries[injuries['week'] == week]
+        if team:
+            filtered_injuries = filtered_injuries[filtered_injuries['team'] == team]
+        
+        # Process player data
+        players = []
+        for _, injury in filtered_injuries.iterrows():
+            players.append({
+                'player_id': injury['gsis_id'],
+                'name': injury['full_name'],
+                'team': injury['team'],
+                'position': injury['position'],
+                'primary_injury': injury['report_primary_injury'],
+                'secondary_injury': injury['report_secondary_injury'],
+                'status': injury['report_status'],
+                'practice_status': injury['practice_status'],
+                'date_modified': injury['date_modified']
+            })
+        
+        return jsonify({
+            'season': season,
+            'week': week,
+            'team': team,
+            'players': players,
+            'total_players': len(players)
+        })
+        
+    except Exception as e:
+        logger.error(f"Error getting player injuries: {e}")
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/injuries/summary', methods=['GET'])
+def get_injury_summary():
+    """Get injury summary statistics."""
+    try:
+        season = request.args.get('season', 2025, type=int)
+        
+        # Load injury data
+        injuries = injury_calculator.load_injury_data([season])
+        
+        # Calculate summary statistics
+        total_injuries = len(injuries)
+        unique_players = injuries['gsis_id'].nunique()
+        teams_affected = injuries['team'].nunique()
+        
+        # Most common injuries
+        common_injuries = injuries['report_primary_injury'].value_counts().head(10).to_dict()
+        
+        # Most common statuses
+        common_statuses = injuries['report_status'].value_counts().to_dict()
+        
+        # Team injury counts
+        team_counts = injuries['team'].value_counts().to_dict()
+        
+        return jsonify({
+            'season': season,
+            'summary': {
+                'total_injuries': total_injuries,
+                'unique_players': unique_players,
+                'teams_affected': teams_affected
+            },
+            'common_injuries': common_injuries,
+            'common_statuses': common_statuses,
+            'team_counts': team_counts
+        })
+        
+    except Exception as e:
+        logger.error(f"Error getting injury summary: {e}")
+        return jsonify({'error': str(e)}), 500
 
 
 if __name__ == '__main__':

@@ -9,8 +9,10 @@ import ExpertPicks from './components/ExpertPicks';
 import Performance from './components/Performance';
 import CronStatus from './components/CronStatus';
 import TeamComparison from './components/TeamComparison';
+import ELOVisualizations from './components/ELOVisualizations';
+import InjuryData from './components/InjuryData';
 import SystemStatus from './components/SystemStatus';
-import { apiService } from './services/api';
+import apiService from './services/api';
 import './App.css';
 
 function App() {
@@ -79,6 +81,8 @@ function App() {
               <Route path="/predictions" element={<Predictions />} />
               <Route path="/expert-picks" element={<ExpertPicks />} />
               <Route path="/team-comparison" element={<TeamComparison />} />
+              <Route path="/elo-visualizations" element={<ELOVisualizations />} />
+              <Route path="/injury-data" element={<InjuryData />} />
               <Route path="/performance" element={<Performance />} />
               <Route path="/cron-status" element={<CronStatus />} />
               <Route path="/system" element={<SystemStatus />} />

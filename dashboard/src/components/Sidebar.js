@@ -9,7 +9,9 @@ import {
   Activity,
   Users,
   Clock,
-  GitCompare
+  GitCompare,
+  LineChart,
+  AlertTriangle
 } from 'lucide-react';
 
 const Sidebar = () => {
@@ -19,6 +21,8 @@ const Sidebar = () => {
     { name: 'Dashboard', href: '/', icon: Home },
     { name: 'Team Rankings', href: '/rankings', icon: Trophy },
     { name: 'Team Comparison', href: '/team-comparison', icon: GitCompare },
+    { name: 'ELO Visualizations', href: '/elo-visualizations', icon: LineChart },
+    { name: 'Injury Data', href: '/injury-data', icon: AlertTriangle },
     { name: 'Predictions', href: '/predictions', icon: Target },
     { name: 'Expert Picks', href: '/expert-picks', icon: Users },
     { name: 'Performance', href: '/performance', icon: BarChart3 },

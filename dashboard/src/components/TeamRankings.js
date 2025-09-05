@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { apiService } from '../services/api';
+import apiService from '../services/api';
 import { Trophy, TrendingUp, TrendingDown, Calendar, RefreshCw, BarChart3 } from 'lucide-react';
 
 const TeamRankings = () => {
