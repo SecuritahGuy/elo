@@ -11,7 +11,9 @@ import {
   Clock,
   GitCompare,
   LineChart,
-  AlertTriangle
+  AlertTriangle,
+  Smartphone,
+  Monitor
 } from 'lucide-react';
 
 const Sidebar = () => {
@@ -23,6 +25,8 @@ const Sidebar = () => {
     { name: 'Team Comparison', href: '/team-comparison', icon: GitCompare },
     { name: 'ELO Visualizations', href: '/elo-visualizations', icon: LineChart },
     { name: 'Injury Data', href: '/injury-data', icon: AlertTriangle },
+    { name: 'Mobile Optimizations', href: '/mobile-optimizations', icon: Smartphone },
+    { name: 'Performance Monitoring', href: '/performance-monitoring', icon: Monitor },
     { name: 'Predictions', href: '/predictions', icon: Target },
     { name: 'Expert Picks', href: '/expert-picks', icon: Users },
     { name: 'Performance', href: '/performance', icon: BarChart3 },

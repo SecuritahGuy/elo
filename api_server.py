@@ -400,6 +400,60 @@ def get_elo_team_comparison():
         logger.error(f"Error getting ELO team comparison: {e}")
         return jsonify({'error': str(e)}), 500
 
+@app.route('/api/elo/recalculate', methods=['POST'])
+def recalculate_elo_ratings():
+    """Trigger ELO rating recalculation for all teams."""
+    try:
+        import subprocess
+        import sys
+        import os
+        
+        # Get the project root directory
+        project_root = os.path.dirname(os.path.abspath(__file__))
+        script_path = os.path.join(project_root, 'calculate_real_elo_ratings.py')
+        
+        # Check if script exists
+        if not os.path.exists(script_path):
+            return jsonify({'error': 'ELO calculation script not found'}), 404
+        
+        # Run the ELO calculation script
+        result = subprocess.run(
+            [sys.executable, script_path],
+            cwd=project_root,
+            capture_output=True,
+            text=True,
+            timeout=300  # 5 minute timeout
+        )
+        
+        if result.returncode == 0:
+            return jsonify({
+                'status': 'success',
+                'message': 'ELO ratings recalculated successfully',
+                'output': result.stdout,
+                'timestamp': datetime.now().isoformat()
+            })
+        else:
+            return jsonify({
+                'status': 'error',
+                'message': 'ELO calculation failed',
+                'error': result.stderr,
+                'timestamp': datetime.now().isoformat()
+            }), 500
+            
+    except subprocess.TimeoutExpired:
+        return jsonify({
+            'status': 'error',
+            'message': 'ELO calculation timed out',
+            'timestamp': datetime.now().isoformat()
+        }), 500
+    except Exception as e:
+        logger.error(f"Error recalculating ELO ratings: {e}")
+        return jsonify({
+            'status': 'error',
+            'message': str(e),
+            'timestamp': datetime.now().isoformat()
+        }), 500
+
 @app.route('/api/system/cron-status', methods=['GET'])
 def get_cron_status():
     """Get cron job status and monitoring data."""
@@ -537,6 +591,148 @@ def update_configuration():
     except Exception as e:
         logger.error(f"Error updating configuration: {e}")
         return jsonify({'error': str(e)}), 500
+
+# Team Detail endpoints
+@app.route('/api/teams/<team>/roster', methods=['GET'])
+def get_team_roster(team):
+    """Get team roster with individual player ELOs."""
+    try:
+        season = request.args.get('season', 2024, type=int)
+        
+        # Mock roster data for now - in production, this would come from database
+        roster = generate_mock_roster(team, season)
+        
+        return jsonify({
+            'team': team,
+            'season': season,
+            'roster': roster,
+            'timestamp': datetime.now().isoformat()
+        })
+        
+    except Exception as e:
+        logger.error(f"Error getting team roster for {team}: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/teams/<team>/games', methods=['GET'])
+def get_team_games(team):
+    """Get team games for a season."""
+    try:
+        season = request.args.get('season', 2024, type=int)
+        week = request.args.get('week', type=int)
+        
+        # Mock games data for now - in production, this would come from database
+        games = generate_mock_games(team, season, week)
+        
+        return jsonify({
+            'team': team,
+            'season': season,
+            'games': games,
+            'timestamp': datetime.now().isoformat()
+        })
+        
+    except Exception as e:
+        logger.error(f"Error getting team games for {team}: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/teams/<team>/analysis', methods=['GET'])
+def get_team_analysis(team):
+    """Get comprehensive team analysis."""
+    try:
+        season = request.args.get('season', 2024, type=int)
+        
+        # Mock analysis data for now - in production, this would come from database
+        analysis = generate_mock_team_analysis(team, season)
+        
+        return jsonify({
+            'team': team,
+            'season': season,
+            'analysis': analysis,
+            'timestamp': datetime.now().isoformat()
+        })
+        
+    except Exception as e:
+        logger.error(f"Error getting team analysis for {team}: {e}")
+        return jsonify({'error': str(e)}), 500
+
+def generate_mock_roster(team, season):
+    """Generate mock roster data."""
+    positions = ['QB', 'RB', 'WR', 'TE', 'OL', 'DL', 'LB', 'CB', 'S', 'K', 'P']
+    roster = []
+    
+    for position in positions:
+        count = 5 if position == 'OL' else 4 if position == 'DL' else 3 if position == 'LB' else 1
+        for i in range(count):
+            roster.append({
+                'id': f"{team}-{position}-{i+1}",
+                'name': f"Player {i+1}",
+                'position': position,
+                'jersey': (i + 1) * 10 if position != 'OL' else (i + 1) * 5,
+                'age': 22 + i,
+                'experience': i + 1,
+                'elo': 1400 + (i * 50) + (hash(team + position) % 100),
+                'status': 'Active' if i < 2 else 'Injured' if i == 2 else 'Active',
+                'injury': 'Knee' if i == 2 else None
+            })
+    
+    return roster
+
+def generate_mock_games(team, season, week=None):
+    """Generate mock games data."""
+    opponents = ['DAL', 'NYG', 'WAS', 'BUF', 'MIA', 'NE', 'NYJ', 'BAL', 'CIN', 'CLE', 'PIT', 'SF', 'LAR', 'SEA', 'ARI', 'ATL', 'CAR', 'NO']
+    games = []
+    
+    weeks = [week] if week else range(1, 19)
+    
+    for w in weeks:
+        opponent = opponents[w % len(opponents)]
+        is_home = w % 2 == 0
+        team_score = 20 + (w * 2) + (hash(team + str(w)) % 15)
+        opponent_score = 18 + (w * 2) + (hash(opponent + str(w)) % 15)
+        won = team_score > opponent_score
+        
+        games.append({
+            'week': w,
+            'opponent': opponent,
+            'is_home': is_home,
+            'team_score': team_score,
+            'opponent_score': opponent_score,
+            'won': won,
+            'date': f"{season}-09-{w:02d}",
+            'weather': 'Clear' if w % 3 != 0 else 'Rain',
+            'temperature': 60 + (w * 2) + (hash(team + str(w)) % 20)
+        })
+    
+    return games
+
+def generate_mock_team_analysis(team, season):
+    """Generate mock team analysis data."""
+    return {
+        'strengths': [
+            'Strong passing offense',
+            'Solid defensive line',
+            'Good special teams'
+        ],
+        'weaknesses': [
+            'Inconsistent running game',
+            'Secondary needs improvement',
+            'Penalty issues'
+        ],
+        'key_players': [
+            {'name': 'QB1', 'position': 'QB', 'impact': 'High'},
+            {'name': 'WR1', 'position': 'WR', 'impact': 'High'},
+            {'name': 'LB1', 'position': 'LB', 'impact': 'Medium'}
+        ],
+        'trends': {
+            'offense_trend': 'Improving',
+            'defense_trend': 'Stable',
+            'special_teams_trend': 'Declining'
+        },
+        'predictions': {
+            'playoff_probability': 0.75,
+            'division_rank': 1,
+            'super_bowl_probability': 0.15
+        }
+    }
 
 # Legacy endpoints for existing dashboard
 @app.route('/api/teams/rankings', methods=['GET'])

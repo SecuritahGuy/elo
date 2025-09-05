@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import apiService from '../services/api';
-import { Trophy, TrendingUp, TrendingDown, Calendar, RefreshCw, BarChart3 } from 'lucide-react';
+import { Trophy, TrendingUp, TrendingDown, Calendar, RefreshCw, BarChart3, ExternalLink } from 'lucide-react';
 
 const TeamRankings = () => {
+  const navigate = useNavigate();
   const [rankings, setRankings] = useState([]);
   const [seasons, setSeasons] = useState([]);
   const [selectedSeason, setSelectedSeason] = useState(2024);
@@ -188,7 +190,13 @@ const TeamRankings = () => {
                   {team.rank}
                 </div>
                 <div>
-                  <p className="font-semibold text-gray-900">{team.team}</p>
+                  <button
+                    onClick={() => navigate(`/team/${team.team}`)}
+                    className="flex items-center text-left hover:text-nfl-primary transition-colors group"
+                  >
+                    <p className="font-semibold text-gray-900 group-hover:text-nfl-primary">{team.team}</p>
+                    <ExternalLink className="h-4 w-4 ml-2 text-gray-400 group-hover:text-nfl-primary" />
+                  </button>
                   <p className="text-sm text-gray-500">
                     {team.wins}-{team.losses} ({team.win_pct ? (team.win_pct * 100).toFixed(1) : 0}%)
                   </p>

@@ -11,6 +11,9 @@ import CronStatus from './components/CronStatus';
 import TeamComparison from './components/TeamComparison';
 import ELOVisualizations from './components/ELOVisualizations';
 import InjuryData from './components/InjuryData';
+import TeamDetail from './components/TeamDetail';
+import MobileOptimizations from './components/MobileOptimizations';
+import PerformanceMonitoring from './components/PerformanceMonitoring';
 import SystemStatus from './components/SystemStatus';
 import apiService from './services/api';
 import './App.css';
@@ -78,11 +81,14 @@ function App() {
             <Routes>
               <Route path="/" element={<Dashboard />} />
               <Route path="/rankings" element={<TeamRankings />} />
+              <Route path="/team/:team" element={<TeamDetail />} />
               <Route path="/predictions" element={<Predictions />} />
               <Route path="/expert-picks" element={<ExpertPicks />} />
               <Route path="/team-comparison" element={<TeamComparison />} />
               <Route path="/elo-visualizations" element={<ELOVisualizations />} />
               <Route path="/injury-data" element={<InjuryData />} />
+              <Route path="/mobile-optimizations" element={<MobileOptimizations />} />
+              <Route path="/performance-monitoring" element={<PerformanceMonitoring />} />
               <Route path="/performance" element={<Performance />} />
               <Route path="/cron-status" element={<CronStatus />} />
               <Route path="/system" element={<SystemStatus />} />

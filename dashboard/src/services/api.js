@@ -109,6 +109,21 @@ export const apiService = {
   },
   getInjurySummary: (season = 2025) =>
     api.get(`/api/injuries/summary?season=${season}`),
+
+  // Team Detail endpoints
+  getTeamRoster: (team, season = 2024) =>
+    api.get(`/api/teams/${team}/roster?season=${season}`),
+  getTeamGames: (team, season = 2024, week = null) => {
+    const params = new URLSearchParams({ season });
+    if (week) params.append('week', week);
+    return api.get(`/api/teams/${team}/games?${params}`);
+  },
+  getTeamAnalysis: (team, season = 2024) =>
+    api.get(`/api/teams/${team}/analysis?season=${season}`),
+
+  // ELO Management endpoints
+  recalculateEloRatings: () =>
+    api.post('/api/elo/recalculate'),
 };
 
 export default apiService;
