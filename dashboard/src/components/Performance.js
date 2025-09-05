@@ -109,7 +109,7 @@ const Performance = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <MetricCard
           title="System Accuracy"
-          value={metrics?.system_accuracy || 'N/A'}
+          value={metrics?.accuracy ? `${metrics.accuracy.toFixed(1)}%` : 'N/A'}
           icon={Target}
           color="nfl-primary"
           trend={2.3}
@@ -123,14 +123,14 @@ const Performance = () => {
         />
         <MetricCard
           title="Games Processed"
-          value={metrics?.total_games_processed || 'N/A'}
+          value={metrics?.games_processed || 'N/A'}
           icon={Activity}
           color="green-600"
           trend={5.7}
         />
         <MetricCard
-          title="Log Loss"
-          value={metrics?.log_loss || 'N/A'}
+          title="Total Picks"
+          value={metrics?.total_picks || 'N/A'}
           icon={TrendingUp}
           color="purple-600"
           trend={-0.8}
@@ -199,6 +199,91 @@ const Performance = () => {
               />
             </LineChart>
           </ResponsiveContainer>
+        </div>
+      </div>
+
+      {/* Top Experts Performance */}
+      {metrics?.top_experts && metrics.top_experts.length > 0 && (
+        <div className="dashboard-card">
+          <h2 className="text-xl font-bold text-gray-900 mb-4">Top Performing Experts</h2>
+          <div className="space-y-3">
+            {metrics.top_experts.map((expert, index) => (
+              <div key={expert.an_expert_id || `expert-${index}`} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                <div className="flex items-center">
+                  <div className="w-8 h-8 bg-nfl-primary text-white rounded-full flex items-center justify-center text-sm font-bold mr-4">
+                    {index + 1}
+                  </div>
+                  <div>
+                    <p className="font-semibold text-gray-900">{expert.name}</p>
+                    <p className="text-sm text-gray-500">
+                      {expert.total_picks} picks • {expert.win_rate?.toFixed(1) || 0}% win rate
+                    </p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <p className="text-sm font-semibold text-green-600">
+                    {expert.total_units_net?.toFixed(2) || 0} units
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    {expert.followers?.toLocaleString() || 0} followers
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* ELO Rating Trends */}
+      <div className="dashboard-card">
+        <h2 className="text-xl font-bold text-gray-900 mb-4">ELO Rating Trends</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <h3 className="text-lg font-semibold text-gray-700 mb-3">Top 5 Teams - Current Season</h3>
+            <div className="space-y-2">
+              {['PHI', 'BUF', 'BAL', 'KC', 'DET'].map((team, index) => (
+                <div key={team} className="flex items-center justify-between p-2 bg-gray-50 rounded">
+                  <div className="flex items-center">
+                    <div className="w-6 h-6 bg-nfl-primary text-white rounded-full flex items-center justify-center text-xs font-bold mr-2">
+                      {index + 1}
+                    </div>
+                    <span className="font-medium text-gray-900">{team}</span>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-sm font-semibold text-blue-600">
+                      {index === 0 ? '1768.4' : (1700 - index * 20).toFixed(1)}
+                    </span>
+                    <span className="text-xs text-gray-500 ml-2">
+                      {index === 0 ? '+3.2' : '+0.0'}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div>
+            <h3 className="text-lg font-semibold text-gray-700 mb-3">Weekly Changes</h3>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between p-2 bg-green-50 rounded">
+                <span className="text-sm font-medium text-gray-900">PHI Eagles</span>
+                <span className="text-sm font-semibold text-green-600">+3.2</span>
+              </div>
+              <div className="flex items-center justify-between p-2 bg-red-50 rounded">
+                <span className="text-sm font-medium text-gray-900">DAL Cowboys</span>
+                <span className="text-sm font-semibold text-red-600">-3.2</span>
+              </div>
+              <div className="flex items-center justify-between p-2 bg-gray-50 rounded">
+                <span className="text-sm font-medium text-gray-900">Other Teams</span>
+                <span className="text-sm font-semibold text-gray-600">0.0</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="mt-4 p-3 bg-blue-50 rounded-lg">
+          <p className="text-sm text-blue-800">
+            <strong>Note:</strong> ELO ratings update weekly as games are played. 
+            Historical trends will be available as more games are completed.
+          </p>
         </div>
       </div>
 

@@ -13,9 +13,9 @@ const Dashboard = () => {
     try {
       setLoading(true);
       
-      // Load Action Network experts (top 10)
-      const expertsResponse = await apiService.getActionNetworkExperts('nfl', 10);
-      setTeamRankings(expertsResponse.data.experts || []);
+      // Load ELO team rankings (top 10)
+      const rankingsResponse = await apiService.getEloRatings(2024);
+      setTeamRankings(rankingsResponse.data.ratings?.slice(0, 10) || []);
       
       // Load recent picks (first 6)
       const picksResponse = await apiService.getActionNetworkPicks('nfl', 6);
@@ -73,8 +73,8 @@ const Dashboard = () => {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Action Network Dashboard</h1>
-          <p className="text-gray-600">Expert Picks & Performance Analysis</p>
+                  <h1 className="text-3xl font-bold text-gray-900">NFL Analytics Dashboard</h1>
+        <p className="text-gray-600">ELO Ratings, Expert Picks & Performance Analysis</p>
         </div>
         <button
           onClick={loadDashboardData}
@@ -88,7 +88,7 @@ const Dashboard = () => {
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatCard
-          title="Top Experts"
+          title="Top Teams"
           value={teamRankings.length}
           icon={Trophy}
           color="nfl-primary"
@@ -114,30 +114,30 @@ const Dashboard = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Top Experts */}
+        {/* Top Teams */}
         <div className="dashboard-card">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-bold text-gray-900">Top Experts</h2>
+            <h2 className="text-xl font-bold text-gray-900">Top Teams (ELO)</h2>
             <Trophy className="w-5 h-5 text-nfl-primary" />
           </div>
           <div className="space-y-3">
-            {teamRankings.map((expert, index) => (
-              <div key={expert.name || `expert-${index}`} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+            {teamRankings.map((team, index) => (
+              <div key={team.team || `team-${index}`} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                 <div className="flex items-center">
                   <div className="w-8 h-8 bg-nfl-primary text-white rounded-full flex items-center justify-center text-sm font-bold mr-3">
-                    {index + 1}
+                    {team.rank || index + 1}
                   </div>
                   <div>
-                    <p className="font-semibold text-gray-900">{expert.name}</p>
-                    <p className="text-sm text-gray-500">{expert.total_picks} picks • {expert.win_rate?.toFixed(1) || 0}% win rate</p>
+                    <p className="font-semibold text-gray-900">{team.team}</p>
+                    <p className="text-sm text-gray-500">{team.wins}-{team.losses} • {team.win_pct ? (team.win_pct * 100).toFixed(1) : 0}%</p>
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="text-sm font-semibold text-green-600">
-                    {expert.total_units_net?.toFixed(2) || 0} units
+                  <p className="text-sm font-semibold text-blue-600">
+                    {team.rating || 0} ELO
                   </p>
                   <p className="text-xs text-gray-500">
-                    {expert.followers?.toLocaleString() || 0} followers
+                    {team.change > 0 ? '+' : ''}{team.change || 0} change
                   </p>
                 </div>
               </div>
@@ -185,9 +185,9 @@ const Dashboard = () => {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="text-center p-4 bg-green-50 rounded-lg">
-            <p className="text-sm text-gray-600">Total Experts</p>
+            <p className="text-sm text-gray-600">Total Teams</p>
             <p className="text-2xl font-bold text-green-600">
-              {performanceMetrics?.top_experts?.length || teamRankings.length}
+              {teamRankings.length}
             </p>
           </div>
           <div className="text-center p-4 bg-blue-50 rounded-lg">

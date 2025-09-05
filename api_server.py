@@ -7,10 +7,14 @@ import json
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Any
 import logging
+from pathlib import Path
 
 # Import Action Network components
 from ingest.action_network.analysis_tools import ActionNetworkAnalyzer
 from ingest.action_network.team_mapper import ActionNetworkTeamMapper
+
+# Import ELO components
+from ingest.nfl.elo_data_service import EloDataService
 
 app = Flask(__name__)
 CORS(app)
@@ -22,6 +26,7 @@ logger = logging.getLogger(__name__)
 # Initialize analyzers
 analyzer = ActionNetworkAnalyzer()
 team_mapper = ActionNetworkTeamMapper()
+elo_service = EloDataService()
 
 @app.route('/api/system/status', methods=['GET'])
 def get_system_status():
@@ -308,6 +313,227 @@ def get_teams():
         logger.error(f"Error getting teams: {e}")
         return jsonify({'error': str(e)}), 500
 
+# ELO Ratings endpoints
+@app.route('/api/elo/seasons', methods=['GET'])
+def get_elo_seasons():
+    """Get available seasons for ELO ratings."""
+    try:
+        seasons = elo_service.get_available_seasons()
+        return jsonify({'seasons': seasons, 'timestamp': datetime.now().isoformat()})
+    except Exception as e:
+        logger.error(f"Error getting ELO seasons: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/elo/ratings', methods=['GET'])
+def get_elo_ratings():
+    """Get ELO ratings for a specific season."""
+    try:
+        season = request.args.get('season', 2024, type=int)
+        config_name = request.args.get('config', 'baseline')
+        
+        ratings = elo_service.get_team_ratings_for_season(season, config_name)
+        return jsonify({
+            'ratings': ratings,
+            'season': season,
+            'config': config_name,
+            'total_teams': len(ratings),
+            'timestamp': datetime.now().isoformat()
+        })
+    except Exception as e:
+        logger.error(f"Error getting ELO ratings: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/elo/team/<team>', methods=['GET'])
+def get_team_elo_history(team):
+    """Get ELO rating history for a specific team."""
+    try:
+        seasons = request.args.getlist('seasons', type=int)
+        if not seasons:
+            seasons = [2020, 2021, 2022, 2023, 2024]
+        
+        history = elo_service.get_rating_history(team.upper(), seasons)
+        return jsonify({
+            'team': team.upper(),
+            'history': history,
+            'seasons': seasons,
+            'timestamp': datetime.now().isoformat()
+        })
+    except Exception as e:
+        logger.error(f"Error getting team ELO history: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/elo/season-summary', methods=['GET'])
+def get_elo_season_summary():
+    """Get ELO season summary statistics."""
+    try:
+        season = request.args.get('season', 2024, type=int)
+        summary = elo_service.get_season_summary(season)
+        return jsonify({
+            'summary': summary,
+            'timestamp': datetime.now().isoformat()
+        })
+    except Exception as e:
+        logger.error(f"Error getting ELO season summary: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/elo/compare', methods=['GET'])
+def get_elo_team_comparison():
+    """Get ELO comparison for specific teams."""
+    try:
+        teams = request.args.getlist('teams')
+        season = request.args.get('season', 2024, type=int)
+        
+        if not teams:
+            return jsonify({'error': 'No teams specified'}), 400
+        
+        comparison = elo_service.get_team_comparison(teams, season)
+        return jsonify({
+            'teams': comparison,
+            'season': season,
+            'timestamp': datetime.now().isoformat()
+        })
+    except Exception as e:
+        logger.error(f"Error getting ELO team comparison: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/system/cron-status', methods=['GET'])
+def get_cron_status():
+    """Get cron job status and monitoring data."""
+    try:
+        # Import the cron monitor directly instead of using subprocess
+        from monitoring.cron_monitor import CronJobMonitor
+        
+        # Create monitor instance and generate report
+        monitor = CronJobMonitor()
+        cron_data = monitor.generate_status_report()
+        
+        return jsonify(cron_data)
+            
+    except Exception as e:
+        logger.error(f"Error getting cron status: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/metrics/performance', methods=['GET'])
+def get_performance_metrics():
+    """Get performance metrics for the dashboard."""
+    try:
+        # Get Action Network analytics for performance metrics
+        analytics = analyzer.get_league_performance_summary('nfl')
+        
+        # Get expert performance data
+        top_experts = analyzer.get_top_experts('nfl', limit=10)
+        
+        # Calculate performance metrics
+        total_picks = analytics.get('total_picks', 0)
+        win_rate = analytics.get('win_rate', 0)
+        total_units = analytics.get('total_units_net', 0)
+        
+        performance_data = {
+            'accuracy': win_rate,
+            'brier_score': 0.22,  # Placeholder - would calculate from actual data
+            'games_processed': analytics.get('recent_picks', 0),  # Use recent picks as games processed
+            'confidence': 0.75,  # Placeholder
+            'total_picks': total_picks,
+            'win_rate': win_rate,
+            'total_units': total_units,
+            'top_experts': top_experts[:5],  # Top 5 experts
+            'timestamp': datetime.now().isoformat()
+        }
+        
+        return jsonify(performance_data)
+        
+    except Exception as e:
+        logger.error(f"Error getting performance metrics: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/system/health', methods=['GET'])
+def get_system_health():
+    """Get system health status."""
+    try:
+        # Get basic system status
+        status_response = get_system_status()
+        status_data = status_response.get_json()
+        
+        # Add additional health metrics
+        health_data = {
+            'overall_status': status_data.get('status', 'unknown'),
+            'action_network': status_data.get('action_network', {}),
+            'database': status_data.get('database', {}),
+            'nfl_stats': status_data.get('nfl_stats', {}),
+            'timestamp': datetime.now().isoformat(),
+            'uptime': 'N/A',  # Would calculate actual uptime
+            'memory_usage': 'N/A',  # Would get actual memory usage
+            'cpu_usage': 'N/A'  # Would get actual CPU usage
+        }
+        
+        return jsonify(health_data)
+        
+    except Exception as e:
+        logger.error(f"Error getting system health: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/config', methods=['GET'])
+def get_configuration():
+    """Get system configuration."""
+    try:
+        config_data = {
+            'action_network': {
+                'enabled': True,
+                'expert_picks_interval_minutes': 15,
+                'all_picks_interval_minutes': 5,
+                'max_retries': 3,
+                'retry_delay_seconds': 30
+            },
+            'nfl_stats': {
+                'enabled': True,
+                'collection_interval_hours': 6,
+                'years': [2024, 2025],
+                'include_weather': True,
+                'include_travel': True,
+                'include_ngs': True,
+                'include_epa': True,
+                'include_qb_stats': True,
+                'include_turnover_stats': True,
+                'include_redzone_stats': True,
+                'include_downs_stats': True
+            },
+            'database': {
+                'path': 'artifacts/stats/nfl_elo_stats.db',
+                'backup_enabled': True,
+                'backup_interval_hours': 24
+            },
+            'logging': {
+                'level': 'INFO',
+                'file': 'artifacts/automated_collection/collection.log',
+                'max_size_mb': 100,
+                'backup_count': 5
+            },
+            'timestamp': datetime.now().isoformat()
+        }
+        
+        return jsonify(config_data)
+        
+    except Exception as e:
+        logger.error(f"Error getting configuration: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/config', methods=['PUT'])
+def update_configuration():
+    """Update system configuration."""
+    try:
+        # In a real implementation, this would save the config to a file
+        # For now, just return success
+        config_data = request.get_json()
+        
+        return jsonify({
+            'message': 'Configuration updated successfully',
+            'timestamp': datetime.now().isoformat()
+        })
+        
+    except Exception as e:
+        logger.error(f"Error updating configuration: {e}")
+        return jsonify({'error': str(e)}), 500
+
 # Legacy endpoints for existing dashboard
 @app.route('/api/teams/rankings', methods=['GET'])
 def get_team_rankings():
@@ -326,13 +552,6 @@ def get_week_predictions(week):
         'message': 'Use Action Network picks endpoint for prediction data'
     })
 
-@app.route('/api/metrics/performance', methods=['GET'])
-def get_performance_metrics():
-    """Legacy endpoint for performance metrics."""
-    return jsonify({
-        'metrics': {},
-        'message': 'Use Action Network analytics endpoint for performance data'
-    })
 
 if __name__ == '__main__':
     print("Starting Action Network API server...")

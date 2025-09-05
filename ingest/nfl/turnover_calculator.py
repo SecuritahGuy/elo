@@ -36,9 +36,25 @@ class TurnoverCalculator:
         
         print(f"Loading turnover data for years {years}...")
         
-        # Load play-by-play data
-        pbp = nfl.import_pbp_data(years, downcast=True)
-        print(f"Loaded {len(pbp)} plays")
+        # Filter out future years that don't have data yet
+        current_year = datetime.now().year
+        available_years = [year for year in years if year <= current_year]
+        
+        if not available_years:
+            print(f"Warning: No turnover data available for years {years} (all are future years)")
+            return pd.DataFrame()
+        
+        if len(available_years) < len(years):
+            future_years = [year for year in years if year > current_year]
+            print(f"Warning: Skipping future years {future_years} - no turnover data available yet")
+        
+        try:
+            # Load play-by-play data
+            pbp = nfl.import_pbp_data(available_years, downcast=True)
+            print(f"Loaded {len(pbp)} plays")
+        except Exception as e:
+            print(f"Warning: Could not load turnover data for years {available_years}: {e}")
+            return pd.DataFrame()
         
         # Calculate offensive turnovers (giveaways)
         offensive_turnovers = pbp.groupby(['posteam', 'season']).agg({

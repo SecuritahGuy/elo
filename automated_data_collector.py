@@ -293,10 +293,15 @@ class AutomatedDataCollector:
                         'success': True
                     }
                 except Exception as e:
-                    self.logger.warning(f"Error loading turnover data: {e}")
+                    # Check if it's a future year issue
+                    if "2025" in str(e) or any(str(year) in str(e) for year in years if year > 2024):
+                        self.logger.info(f"Turnover data not available for future years - this is expected: {e}")
+                    else:
+                        self.logger.warning(f"Error loading turnover data: {e}")
                     results['collections']['turnover'] = {
                         'success': False,
-                        'error': str(e)
+                        'error': str(e),
+                        'note': 'Future year data not available yet' if "2025" in str(e) else 'Data loading error'
                     }
             
             # Load redzone data if enabled
@@ -309,10 +314,15 @@ class AutomatedDataCollector:
                         'success': True
                     }
                 except Exception as e:
-                    self.logger.warning(f"Error loading redzone data: {e}")
+                    # Check if it's a future year issue
+                    if "2025" in str(e) or any(str(year) in str(e) for year in years if year > 2024):
+                        self.logger.info(f"Redzone data not available for future years - this is expected: {e}")
+                    else:
+                        self.logger.warning(f"Error loading redzone data: {e}")
                     results['collections']['redzone'] = {
                         'success': False,
-                        'error': str(e)
+                        'error': str(e),
+                        'note': 'Future year data not available yet' if "2025" in str(e) else 'Data loading error'
                     }
             
             # Load downs data if enabled
@@ -325,10 +335,15 @@ class AutomatedDataCollector:
                         'success': True
                     }
                 except Exception as e:
-                    self.logger.warning(f"Error loading downs data: {e}")
+                    # Check if it's a future year issue
+                    if "2025" in str(e) or any(str(year) in str(e) for year in years if year > 2024):
+                        self.logger.info(f"Downs data not available for future years - this is expected: {e}")
+                    else:
+                        self.logger.warning(f"Error loading downs data: {e}")
                     results['collections']['downs'] = {
                         'success': False,
-                        'error': str(e)
+                        'error': str(e),
+                        'note': 'Future year data not available yet' if "2025" in str(e) else 'Data loading error'
                     }
             
             # Store data in database

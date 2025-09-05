@@ -1,8 +1,8 @@
 #!/bin/bash
 
-# NFL Elo Dashboard Startup Script
-echo "🏈 NFL ELO DASHBOARD STARTUP"
-echo "=============================="
+# NFL Elo Dashboard Network Access Startup Script
+echo "🏈 NFL ELO DASHBOARD - NETWORK ACCESS"
+echo "======================================"
 
 # Check if we're in the right directory
 if [ ! -f "api_server.py" ]; then
@@ -10,11 +10,17 @@ if [ ! -f "api_server.py" ]; then
     exit 1
 fi
 
-# Check if dashboard directory exists
-if [ ! -d "dashboard" ]; then
-    echo "❌ Error: Dashboard directory not found"
+# Get local IP address
+LOCAL_IP=$(ifconfig | grep "inet " | grep -v 127.0.0.1 | awk '{print $2}' | head -1)
+
+if [ -z "$LOCAL_IP" ]; then
+    echo "❌ Error: Could not determine local IP address"
+    echo "Please check your network connection"
     exit 1
 fi
+
+echo "📍 Your local IP address: $LOCAL_IP"
+echo ""
 
 # Function to cleanup processes
 cleanup() {
@@ -51,10 +57,10 @@ for i in {1..30}; do
     sleep 1
 done
 
-# Start React app
-echo "🚀 Starting React app..."
+# Start React app with network access
+echo "🚀 Starting React app with network access..."
 cd dashboard
-HOST=0.0.0.0 npm start &
+HOST=0.0.0.0 PORT=3000 npm start &
 REACT_PID=$!
 echo "✅ React app started (PID: $REACT_PID)"
 cd ..
@@ -69,22 +75,24 @@ for i in {1..30}; do
     sleep 2
 done
 
-# Get local IP address
-LOCAL_IP=$(ifconfig | grep "inet " | grep -v 127.0.0.1 | awk '{print $2}' | head -1)
-
-# Display status
+# Display network access information
 echo ""
-echo "🎉 DASHBOARD IS READY!"
-echo "======================"
-echo "🌐 Dashboard (Local): http://localhost:3000"
-echo "🌐 Dashboard (Network): http://${LOCAL_IP}:3000"
-echo "🔧 API Server (Local): http://localhost:8000"
-echo "🔧 API Server (Network): http://${LOCAL_IP}:8000"
-echo "📚 API Docs: http://${LOCAL_IP}:8000/docs"
+echo "🎉 DASHBOARD IS READY FOR NETWORK ACCESS!"
+echo "=========================================="
 echo ""
-echo "💡 Other devices on your network can access:"
+echo "🌐 ACCESS URLS:"
 echo "   Dashboard: http://${LOCAL_IP}:3000"
-echo "   API: http://${LOCAL_IP}:8000"
+echo "   API Server: http://${LOCAL_IP}:8000"
+echo "   API Docs: http://${LOCAL_IP}:8000/docs"
+echo ""
+echo "📱 SHARE WITH OTHER DEVICES:"
+echo "   Any device on your local network can access:"
+echo "   http://${LOCAL_IP}:3000"
+echo ""
+echo "🔧 TROUBLESHOOTING:"
+echo "   • Make sure all devices are on the same WiFi network"
+echo "   • Check firewall settings if connection is refused"
+echo "   • Try accessing from another device's browser"
 echo ""
 echo "⌨️ Press Ctrl+C to stop all services"
 echo ""
@@ -98,18 +106,17 @@ while true; do
     
     # Check API status
     if curl -s http://localhost:8000/ > /dev/null 2>&1; then
-        echo "✅ API Server: Running"
+        echo "✅ API Server: Running on http://${LOCAL_IP}:8000"
     else
         echo "❌ API Server: Not responding"
     fi
     
     # Check React status
     if curl -s http://localhost:3000/ > /dev/null 2>&1; then
-        echo "✅ React App: Running"
+        echo "✅ React App: Running on http://${LOCAL_IP}:3000"
     else
         echo "❌ React App: Not responding"
     fi
     
-    echo "🌐 Dashboard: http://localhost:3000 (Local) | http://${LOCAL_IP}:3000 (Network)"
-    echo "🔧 API: http://localhost:8000 (Local) | http://${LOCAL_IP}:8000 (Network)"
+    echo "🌐 Network Access: http://${LOCAL_IP}:3000"
 done

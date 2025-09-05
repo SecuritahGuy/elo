@@ -75,6 +75,25 @@ export const apiService = {
     api.get(`/api/action-network/analytics?league=${league}`),
   getActionNetworkTeams: () => 
     api.get('/api/action-network/teams'),
+  
+  // System monitoring
+  getCronStatus: () => 
+    api.get('/api/system/cron-status'),
+
+  // ELO Ratings endpoints
+  getEloSeasons: () => api.get('/api/elo/seasons'),
+  getEloRatings: (season = 2024, config = 'baseline') =>
+    api.get(`/api/elo/ratings?season=${season}&config=${config}`),
+  getTeamEloHistory: (team, seasons = [2020, 2021, 2022, 2023, 2024]) => {
+    const seasonParams = seasons.map(s => `seasons=${s}`).join('&');
+    return api.get(`/api/elo/team/${team}?${seasonParams}`);
+  },
+  getEloSeasonSummary: (season = 2024) =>
+    api.get(`/api/elo/season-summary?season=${season}`),
+  getEloTeamComparison: (teams, season = 2024) => {
+    const teamParams = teams.map(t => `teams=${t}`).join('&');
+    return api.get(`/api/elo/compare?${teamParams}&season=${season}`);
+  },
 };
 
 export default api;

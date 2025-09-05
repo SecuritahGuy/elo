@@ -7,6 +7,8 @@ import TeamRankings from './components/TeamRankings';
 import Predictions from './components/Predictions';
 import ExpertPicks from './components/ExpertPicks';
 import Performance from './components/Performance';
+import CronStatus from './components/CronStatus';
+import TeamComparison from './components/TeamComparison';
 import SystemStatus from './components/SystemStatus';
 import { apiService } from './services/api';
 import './App.css';
@@ -76,7 +78,9 @@ function App() {
               <Route path="/rankings" element={<TeamRankings />} />
               <Route path="/predictions" element={<Predictions />} />
               <Route path="/expert-picks" element={<ExpertPicks />} />
+              <Route path="/team-comparison" element={<TeamComparison />} />
               <Route path="/performance" element={<Performance />} />
+              <Route path="/cron-status" element={<CronStatus />} />
               <Route path="/system" element={<SystemStatus />} />
             </Routes>
           </main>

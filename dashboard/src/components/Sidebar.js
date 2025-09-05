@@ -1,13 +1,15 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { 
-  Home, 
-  Trophy, 
-  Target, 
-  BarChart3, 
-  Settings, 
+import {
+  Home,
+  Trophy,
+  Target,
+  BarChart3,
+  Settings,
   Activity,
-  Users
+  Users,
+  Clock,
+  GitCompare
 } from 'lucide-react';
 
 const Sidebar = () => {
@@ -16,9 +18,11 @@ const Sidebar = () => {
   const navigation = [
     { name: 'Dashboard', href: '/', icon: Home },
     { name: 'Team Rankings', href: '/rankings', icon: Trophy },
+    { name: 'Team Comparison', href: '/team-comparison', icon: GitCompare },
     { name: 'Predictions', href: '/predictions', icon: Target },
     { name: 'Expert Picks', href: '/expert-picks', icon: Users },
     { name: 'Performance', href: '/performance', icon: BarChart3 },
+    { name: 'Cron Status', href: '/cron-status', icon: Clock },
     { name: 'System Status', href: '/system', icon: Activity },
   ];
 
