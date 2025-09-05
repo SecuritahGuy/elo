@@ -1,0 +1,33 @@
+{
+  "action_network": {
+    "enabled": true,
+    "expert_picks_interval_minutes": 15,
+    "all_picks_interval_minutes": 5,
+    "max_retries": 3,
+    "retry_delay_seconds": 30
+  },
+  "nfl_stats": {
+    "enabled": true,
+    "collection_interval_hours": 6,
+    "years": [2024, 2025],
+    "include_weather": true,
+    "include_travel": true,
+    "include_ngs": true,
+    "include_epa": true,
+    "include_qb_stats": true,
+    "include_turnover_stats": true,
+    "include_redzone_stats": true,
+    "include_downs_stats": true
+  },
+  "database": {
+    "path": "artifacts/stats/nfl_elo_stats.db",
+    "backup_enabled": true,
+    "backup_interval_hours": 24
+  },
+  "logging": {
+    "level": "INFO",
+    "file": "artifacts/automated_collection/collection.log",
+    "max_size_mb": 100,
+    "backup_count": 5
+  }
+}

@@ -1,0 +1,199 @@
+{
+  "baseline": {
+    "config_name": "baseline",
+    "metrics": {
+      "brier_score": 0.2604833431049519,
+      "log_loss": 0.714224289738494,
+      "ece": 0.16217265827014965,
+      "sharpness": 0.00042452082454192,
+      "n_games": 20,
+      "mean_prediction": 0.5749600658338008,
+      "std_prediction": 0.020603903138529844,
+      "min_prediction": 0.5090312429966032,
+      "max_prediction": 0.6278740756365123,
+      "accuracy": 0.45
+    },
+    "environmental_breakdown": {},
+    "total_games": 20
+  },
+  "weather_only": {
+    "config_name": "weather_only",
+    "metrics": {
+      "brier_score": 0.2604833431049519,
+      "log_loss": 0.714224289738494,
+      "ece": 0.16217265827014965,
+      "sharpness": 0.00042452082454192,
+      "n_games": 20,
+      "mean_prediction": 0.5749600658338008,
+      "std_prediction": 0.020603903138529844,
+      "min_prediction": 0.5090312429966032,
+      "max_prediction": 0.6278740756365123,
+      "accuracy": 0.45
+    },
+    "environmental_breakdown": {},
+    "total_games": 20
+  },
+  "travel_only": {
+    "config_name": "travel_only",
+    "metrics": {
+      "brier_score": 0.2605814530618324,
+      "log_loss": 0.7144219203973923,
+      "ece": 0.16206549508639687,
+      "sharpness": 0.000431522032339817,
+      "n_games": 20,
+      "mean_prediction": 0.5748529026500481,
+      "std_prediction": 0.02077310839378202,
+      "min_prediction": 0.5090312429966032,
+      "max_prediction": 0.6278740756365123,
+      "accuracy": 0.45
+    },
+    "environmental_breakdown": {},
+    "total_games": 20
+  },
+  "qb_only": {
+    "config_name": "qb_only",
+    "metrics": {
+      "brier_score": 0.2604833431049519,
+      "log_loss": 0.714224289738494,
+      "ece": 0.16217265827014965,
+      "sharpness": 0.00042452082454192,
+      "n_games": 20,
+      "mean_prediction": 0.5749600658338008,
+      "std_prediction": 0.020603903138529844,
+      "min_prediction": 0.5090312429966032,
+      "max_prediction": 0.6278740756365123,
+      "accuracy": 0.45
+    },
+    "environmental_breakdown": {},
+    "total_games": 20
+  },
+  "qb_enhanced": {
+    "config_name": "qb_enhanced",
+    "metrics": {
+      "brier_score": 0.25860280555735626,
+      "log_loss": 0.7103781142689165,
+      "ece": 0.3294565001653019,
+      "sharpness": 0.0004120320000970793,
+      "n_games": 20,
+      "mean_prediction": 0.5746943574596189,
+      "std_prediction": 0.020298571380692763,
+      "min_prediction": 0.5091747210562287,
+      "max_prediction": 0.6271804422251508,
+      "accuracy": 0.45
+    },
+    "environmental_breakdown": {
+      "weather": {
+        "total_impact": 0.0,
+        "games_affected": 0,
+        "avg_impact_per_game": 0.0,
+        "percentage_of_games": 0.0
+      },
+      "travel": {
+        "total_impact": 0.0,
+        "games_affected": 0,
+        "avg_impact_per_game": 0.0,
+        "percentage_of_games": 0.0
+      },
+      "qb": {
+        "total_impact": 123.0,
+        "games_affected": 20,
+        "avg_impact_per_game": 6.15,
+        "percentage_of_games": 100.0
+      },
+      "epa": {
+        "total_impact": 5.620945588246012,
+        "games_affected": 15,
+        "avg_impact_per_game": 0.3747297058830675,
+        "percentage_of_games": 75.0
+      },
+      "overall": {
+        "total_environmental_impact": -123.33544728511251,
+        "avg_environmental_impact_per_game": -6.166772364255626,
+        "total_games": 20
+      }
+    },
+    "total_games": 20
+  },
+  "weather_travel": {
+    "config_name": "weather_travel",
+    "metrics": {
+      "brier_score": 0.2605814530618324,
+      "log_loss": 0.7144219203973923,
+      "ece": 0.16206549508639687,
+      "sharpness": 0.000431522032339817,
+      "n_games": 20,
+      "mean_prediction": 0.5748529026500481,
+      "std_prediction": 0.02077310839378202,
+      "min_prediction": 0.5090312429966032,
+      "max_prediction": 0.6278740756365123,
+      "accuracy": 0.45
+    },
+    "environmental_breakdown": {},
+    "total_games": 20
+  },
+  "all_environmental": {
+    "config_name": "all_environmental",
+    "metrics": {
+      "brier_score": 0.2605814530618324,
+      "log_loss": 0.7144219203973923,
+      "ece": 0.16206549508639687,
+      "sharpness": 0.000431522032339817,
+      "n_games": 20,
+      "mean_prediction": 0.5748529026500481,
+      "std_prediction": 0.02077310839378202,
+      "min_prediction": 0.5090312429966032,
+      "max_prediction": 0.6278740756365123,
+      "accuracy": 0.45
+    },
+    "environmental_breakdown": {},
+    "total_games": 20
+  },
+  "all_enhanced": {
+    "config_name": "all_enhanced",
+    "metrics": {
+      "brier_score": 0.25869977292253526,
+      "log_loss": 0.7105737652286562,
+      "ece": 0.3293495133058221,
+      "sharpness": 0.00041798368905912825,
+      "n_games": 20,
+      "mean_prediction": 0.5745873706001392,
+      "std_prediction": 0.020444649399271396,
+      "min_prediction": 0.5091747210562287,
+      "max_prediction": 0.6271804422251508,
+      "accuracy": 0.45
+    },
+    "environmental_breakdown": {
+      "weather": {
+        "total_impact": 0.0,
+        "games_affected": 0,
+        "avg_impact_per_game": 0.0,
+        "percentage_of_games": 0.0
+      },
+      "travel": {
+        "total_impact": 3.5,
+        "games_affected": 2,
+        "avg_impact_per_game": 1.75,
+        "percentage_of_games": 10.0
+      },
+      "qb": {
+        "total_impact": 123.0,
+        "games_affected": 20,
+        "avg_impact_per_game": 6.15,
+        "percentage_of_games": 100.0
+      },
+      "epa": {
+        "total_impact": 5.620945588246012,
+        "games_affected": 15,
+        "avg_impact_per_game": 0.3747297058830675,
+        "percentage_of_games": 75.0
+      },
+      "overall": {
+        "total_environmental_impact": -125.83544728511251,
+        "avg_environmental_impact_per_game": -6.291772364255626,
+        "total_games": 20
+      }
+    },
+    "total_games": 20
+  },
+  "comparison": {
+    "summary_table": 

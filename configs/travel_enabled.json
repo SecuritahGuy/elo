@@ -1,0 +1,13 @@
+{
+  "base_rating": 1500.0,
+  "k": 20.0,
+  "hfa_points": 55.0,
+  "mov_enabled": true,
+  "preseason_regress": 0.75,
+  "use_travel_adjustment": true,
+  "travel_adjustment_weight": 1.0,
+  "travel_fatigue_weight": 1.0,
+  "travel_distance_threshold": 1000.0,
+  "travel_timezone_threshold": 2,
+  "travel_max_delta": 3.0
+}

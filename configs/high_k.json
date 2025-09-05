@@ -1,0 +1,20 @@
+{
+  "base_rating": 1500.0,
+  "k": 30.0,
+  "scale": 400.0,
+  "hfa_points": 55.0,
+  "preseason_regress": 0.75,
+  "mov_enabled": true,
+  "qb_adj_weight": 0.0,
+  "rest_per_day_pts": 1.0,
+  "mov_mult_a": 2.2,
+  "mov_mult_b": 0.001,
+  "use_offdef_split": false,
+  "k_off": 12.0,
+  "k_def": 12.0,
+  "offdef_scale": 30.0,
+  "start_season": 2010,
+  "end_season": 2024,
+  "seed": 42,
+  "max_rating_shift_per_game": 80.0
+}
