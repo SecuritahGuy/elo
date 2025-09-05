@@ -565,8 +565,12 @@ def get_team_injuries():
         season = request.args.get('season', 2025, type=int)
         week = request.args.get('week', 1, type=int)
         
+        # Create a new instance to avoid caching issues
+        from models.nfl_elo.injury_integration import InjuryImpactCalculator
+        calculator = InjuryImpactCalculator()
+        
         # Load injury data
-        injuries = injury_calculator.load_injury_data([season])
+        injuries = calculator.load_injury_data([season])
         
         # Filter by week
         week_injuries = injuries[injuries['week'] == week].copy()
@@ -612,8 +616,12 @@ def get_team_injury_history(team):
         if not weeks:
             weeks = list(range(1, 19))  # All regular season weeks
         
+        # Create a new instance to avoid caching issues
+        from models.nfl_elo.injury_integration import InjuryImpactCalculator
+        calculator = InjuryImpactCalculator()
+        
         # Load injury data
-        injuries = injury_calculator.load_injury_data([season])
+        injuries = calculator.load_injury_data([season])
         
         # Filter by team and weeks
         team_injuries = injuries[
@@ -652,8 +660,12 @@ def get_player_injuries():
         week = request.args.get('week', 1, type=int)
         team = request.args.get('team', None)
         
+        # Create a new instance to avoid caching issues
+        from models.nfl_elo.injury_integration import InjuryImpactCalculator
+        calculator = InjuryImpactCalculator()
+        
         # Load injury data
-        injuries = injury_calculator.load_injury_data([season])
+        injuries = calculator.load_injury_data([season])
         
         # Filter data
         filtered_injuries = injuries[injuries['week'] == week]
@@ -694,8 +706,27 @@ def get_injury_summary():
     try:
         season = request.args.get('season', 2025, type=int)
         
+        # Create a new instance to avoid caching issues
+        from models.nfl_elo.injury_integration import InjuryImpactCalculator
+        calculator = InjuryImpactCalculator()
+        
         # Load injury data
-        injuries = injury_calculator.load_injury_data([season])
+        injuries = calculator.load_injury_data([season])
+        
+        # Check if we have any data
+        if injuries.empty:
+            return jsonify({
+                'season': season,
+                'summary': {
+                    'total_injuries': 0,
+                    'unique_players': 0,
+                    'teams_affected': 0
+                },
+                'common_injuries': {},
+                'common_statuses': {},
+                'team_counts': {},
+                'message': f'No injury data available for {season}. Showing most recent available data.'
+            })
         
         # Calculate summary statistics
         total_injuries = len(injuries)

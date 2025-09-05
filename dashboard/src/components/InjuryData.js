@@ -41,13 +41,46 @@ const InjuryData = () => {
     loadInjuryData();
   }, [selectedSeason, selectedWeek, selectedTeam]);
 
+  // Debug: Log when injurySummary changes
+  useEffect(() => {
+    if (injurySummary) {
+      console.log(`injurySummary state updated for ${selectedSeason}:`, {
+        total_injuries: injurySummary.summary?.total_injuries,
+        unique_players: injurySummary.summary?.unique_players,
+        teams_affected: injurySummary.summary?.teams_affected
+      });
+    }
+  }, [injurySummary, selectedSeason]);
+
   const loadInjuryData = async () => {
     try {
       setLoading(true);
+      setError(null);
+      
+      console.log(`Loading injury data for season: ${selectedSeason}`);
       
       // Load injury summary
       const summaryResponse = await apiService.getInjurySummary(selectedSeason);
+      console.log(`Injury summary response for ${selectedSeason}:`, summaryResponse.data);
+      console.log(`Total injuries for ${selectedSeason}:`, summaryResponse.data.summary.total_injuries);
+      console.log(`Unique players for ${selectedSeason}:`, summaryResponse.data.summary.unique_players);
       setInjurySummary(summaryResponse.data);
+      
+      // Debug: Log what will be displayed in UI
+      console.log(`UI will display for ${selectedSeason}:`, {
+        total_injuries: summaryResponse.data.summary.total_injuries,
+        unique_players: summaryResponse.data.summary.unique_players,
+        teams_affected: summaryResponse.data.summary.teams_affected
+      });
+      
+      // Check if we have data
+      if (summaryResponse.data.summary.total_injuries === 0) {
+        setError(`No injury data available for ${selectedSeason}. ${summaryResponse.data.message || 'Please try a different season.'}`);
+        setTeamInjuries([]);
+        setTeamInjuryHistory([]);
+        setPlayerInjuries([]);
+        return;
+      }
       
       // Load team injuries for current week
       const teamResponse = await apiService.getTeamInjuries(selectedSeason, selectedWeek);
@@ -68,7 +101,11 @@ const InjuryData = () => {
       
     } catch (err) {
       console.error('Error loading injury data:', err);
-      setError('Failed to load injury data');
+      setError('Failed to load injury data. Please try a different season.');
+      setInjurySummary(null);
+      setTeamInjuries([]);
+      setTeamInjuryHistory([]);
+      setPlayerInjuries([]);
     } finally {
       setLoading(false);
     }
@@ -179,12 +216,19 @@ const InjuryData = () => {
             <label className="block text-sm font-medium text-gray-700 mb-1">Season</label>
             <select
               value={selectedSeason}
-              onChange={(e) => setSelectedSeason(parseInt(e.target.value))}
+              onChange={(e) => {
+                const newSeason = parseInt(e.target.value);
+                console.log(`Season selector changed from ${selectedSeason} to ${newSeason}`);
+                setSelectedSeason(newSeason);
+              }}
               className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-nfl-primary focus:border-nfl-primary"
             >
               <option value={2025}>2025</option>
               <option value={2024}>2024</option>
               <option value={2023}>2023</option>
+              <option value={2022}>2022</option>
+              <option value={2021}>2021</option>
+              <option value={2020}>2020</option>
             </select>
           </div>
           
@@ -215,6 +259,15 @@ const InjuryData = () => {
             </select>
           </div>
         </div>
+      </div>
+
+      {/* Debug info */}
+      <div className="bg-yellow-50 border border-yellow-200 rounded-md p-3 mb-4">
+        <p className="text-sm text-yellow-800">
+          <strong>Debug:</strong> Current selectedSeason: {selectedSeason} | 
+          Total Injuries: {injurySummary?.summary?.total_injuries || 'Loading...'} | 
+          Unique Players: {injurySummary?.summary?.unique_players || 'Loading...'}
+        </p>
       </div>
 
       {/* Summary Cards */}

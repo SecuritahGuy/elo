@@ -82,7 +82,40 @@ class InjuryImpactCalculator:
         import nfl_data_py as nfl
         
         print(f"Loading injury data for years {years}...")
-        injuries = nfl.import_injuries(years)
+        
+        # Try to load data for requested years
+        available_years = []
+        for year in years:
+            try:
+                # Test if data is available for this year
+                test_data = nfl.import_injuries([year])
+                if len(test_data) > 0:
+                    available_years.append(year)
+                    print(f"✅ Found injury data for {year}")
+                else:
+                    print(f"⚠️  No injury data found for {year}")
+            except Exception as e:
+                print(f"⚠️  Error loading injury data for {year}: {e}")
+        
+        # Only fall back to recent years if NO requested years have data
+        if not available_years:
+            print("No data found for requested years, trying recent years...")
+            for year in range(2024, 2020, -1):  # Try 2024, 2023, 2022, 2021, 2020
+                try:
+                    test_data = nfl.import_injuries([year])
+                    if len(test_data) > 0:
+                        available_years.append(year)
+                        print(f"✅ Found injury data for {year} (fallback)")
+                        break
+                except Exception as e:
+                    print(f"⚠️  Error loading injury data for {year}: {e}")
+        
+        if not available_years:
+            print("❌ No injury data available for any year")
+            return pd.DataFrame()
+        
+        print(f"Loading injury data for available years: {available_years}")
+        injuries = nfl.import_injuries(available_years)
         print(f"Loaded {len(injuries)} injury records")
         
         # Clean and standardize data
