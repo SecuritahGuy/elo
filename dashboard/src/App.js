@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import NFLDashboard from './components/NFLDashboard';
 import Header from './components/Header';
 import Sidebar from './components/Sidebar';
 import Dashboard from './components/Dashboard';
@@ -80,33 +81,56 @@ function App() {
   return (
     <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <div className="min-h-screen bg-gray-100">
-        <Header systemStatus={systemStatus} />
-        <div className="flex">
-          <Sidebar />
-          <main className="flex-1 p-6">
-            <Routes>
-              <Route path="/" element={<Dashboard />} />
-              <Route path="/rankings" element={<TeamRankings />} />
-              <Route path="/team/:team" element={<TeamDetail />} />
-              <Route path="/predictions" element={<PredictionInterface />} />
-              <Route path="/prediction-analytics" element={<PredictionAnalytics />} />
-              <Route path="/live-tracking" element={<LiveGameTracking />} />
-              <Route path="/confidence-scoring" element={<ConfidenceScoring />} />
-              <Route path="/historical-analysis" element={<HistoricalAnalysis />} />
-              <Route path="/export" element={<ExportFunctionality />} />
-              <Route path="/expert-picks" element={<ExpertPicks />} />
-              <Route path="/team-comparison" element={<TeamComparison />} />
-              <Route path="/elo-visualizations" element={<ELOVisualizations />} />
-              <Route path="/injury-data" element={<InjuryData />} />
-              <Route path="/mobile-optimizations" element={<MobileOptimizations />} />
-              <Route path="/performance-monitoring" element={<PerformanceMonitoring />} />
-              <Route path="/performance" element={<Performance />} />
-              <Route path="/cron-status" element={<CronStatus />} />
-              <Route path="/system" element={<SystemStatus />} />
-              <Route path="/schedule" element={<WeeklySchedule />} />
-            </Routes>
-          </main>
-        </div>
+        <Routes>
+          {/* NFL ELO Dashboard */}
+          <Route path="/" element={<NFLDashboard />} />
+          <Route path="/nfl" element={<NFLDashboard />} />
+          
+          {/* Legacy Multi-Sport Dashboard (kept for reference) */}
+          <Route path="/multi-sport" element={
+            <div className="min-h-screen bg-gray-100">
+              <Header systemStatus={systemStatus} />
+              <div className="flex">
+                <Sidebar />
+                <main className="flex-1 p-6">
+                  <Dashboard />
+                </main>
+              </div>
+            </div>
+          } />
+          
+          {/* Other Legacy Routes */}
+          <Route path="/legacy/*" element={
+            <div className="min-h-screen bg-gray-100">
+              <Header systemStatus={systemStatus} />
+              <div className="flex">
+                <Sidebar />
+                <main className="flex-1 p-6">
+                  <Routes>
+                    <Route path="/rankings" element={<TeamRankings />} />
+                    <Route path="/team/:team" element={<TeamDetail />} />
+                    <Route path="/predictions" element={<PredictionInterface />} />
+                    <Route path="/prediction-analytics" element={<PredictionAnalytics />} />
+                    <Route path="/live-tracking" element={<LiveGameTracking />} />
+                    <Route path="/confidence-scoring" element={<ConfidenceScoring />} />
+                    <Route path="/historical-analysis" element={<HistoricalAnalysis />} />
+                    <Route path="/export" element={<ExportFunctionality />} />
+                    <Route path="/expert-picks" element={<ExpertPicks />} />
+                    <Route path="/team-comparison" element={<TeamComparison />} />
+                    <Route path="/elo-visualizations" element={<ELOVisualizations />} />
+                    <Route path="/injury-data" element={<InjuryData />} />
+                    <Route path="/mobile-optimizations" element={<MobileOptimizations />} />
+                    <Route path="/performance-monitoring" element={<PerformanceMonitoring />} />
+                    <Route path="/performance" element={<Performance />} />
+                    <Route path="/cron-status" element={<CronStatus />} />
+                    <Route path="/system" element={<SystemStatus />} />
+                    <Route path="/schedule" element={<WeeklySchedule />} />
+                  </Routes>
+                </main>
+              </div>
+            </div>
+          } />
+        </Routes>
       </div>
     </Router>
   );

@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5001';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -35,8 +35,30 @@ api.interceptors.response.use(
 
 // API endpoints
 export const apiService = {
+  // NFL-specific endpoints
+  getNFLTeams: () => api.get('/api/sports/nfl/teams'),
+  getNFLGames: () => api.get('/api/sports/nfl/games'),
+  getNFLDashboard: () => api.get('/api/sports/nfl/dashboard'),
+  getNFLStandings: () => api.get('/api/sports/nfl/standings'),
+  getNFLSchedule: (week = null, season = 2025) => {
+    const params = new URLSearchParams();
+    if (week) params.append('week', week);
+    params.append('season', season);
+    return api.get(`/api/sports/nfl/schedule?${params.toString()}`);
+  },
+  getNFLScheduleWithPicks: (week = null, season = 2025) => {
+    const params = new URLSearchParams();
+    if (week) params.append('week', week);
+    params.append('season', season);
+    return api.get(`/api/sports/nfl/schedule-with-picks?${params.toString()}`);
+  },
+  
+  // Multi-sport endpoints (for expert picks only)
+  getSports: () => api.get('/api/sports'),
+  getSportExpertPicks: (sport) => api.get(`/api/sports/${sport}/expert-picks`),
+  
   // System status
-  getSystemStatus: () => api.get('/api/system/status'),
+  getSystemStatus: () => api.get('/api/status'),
   
   // Team data
   getTeamRankings: () => api.get('/api/teams/rankings'),
@@ -49,7 +71,7 @@ export const apiService = {
   
   // Performance metrics
   getPerformanceMetrics: () => api.get('/api/metrics/performance'),
-  getSystemHealth: () => api.get('/api/system/health'),
+  getSystemHealth: () => api.get('/api/health'),
   
   // Historical data
   getHistoricalData: (startDate, endDate) => 
@@ -60,38 +82,42 @@ export const apiService = {
   getConfiguration: () => api.get('/api/config'),
   updateConfiguration: (config) => api.put('/api/config', config),
   
-  // Action Network endpoints
-  getActionNetworkExperts: (league = 'nfl', limit = 50) => 
-    api.get(`/api/action-network/experts?league=${league}&limit=${limit}`),
+  // Action Network endpoints (using multi-sport API)
+  getActionNetworkExperts: (sport = 'nfl', limit = 50) => 
+    api.get(`/api/sports/${sport}/expert-picks?limit=${limit}`),
   getActionNetworkExpertDetails: (expertId) => 
     api.get(`/api/action-network/experts/${expertId}`),
-  getActionNetworkPicks: (league = 'nfl', limit = 100, expertId = null, result = 'all') => {
-    let url = `/api/action-network/picks?league=${league}&limit=${limit}`;
+  getActionNetworkPicks: (sport = 'nfl', limit = 100, expertId = null, result = 'all') => {
+    let url = `/api/sports/${sport}/expert-picks?limit=${limit}`;
     if (expertId) url += `&expert_id=${expertId}`;
     if (result !== 'all') url += `&result=${result}`;
     return api.get(url);
   },
-  getActionNetworkAnalytics: (league = 'nfl') => 
-    api.get(`/api/action-network/analytics?league=${league}`),
-  getActionNetworkTeams: () => 
-    api.get('/api/action-network/teams'),
+  getActionNetworkAnalytics: (sport = 'nfl') => 
+    api.get(`/api/sports/${sport}/expert-picks?analytics=true`),
+  getActionNetworkTeams: (sport = 'nfl') => 
+    api.get(`/api/sports/${sport}/teams`),
   
   // System monitoring
   getCronStatus: () => 
     api.get('/api/system/cron-status'),
 
   // ELO Ratings endpoints
-  getEloSeasons: () => api.get('/api/elo/seasons'),
+  getEloSeasons: () => {
+    const timestamp = Date.now(); // Cache busting
+    return api.get(`/api/elo/seasons?_t=${timestamp}`);
+  },
   getEloRatings: (season = 2024, config = 'comprehensive') => {
     // Use the real API for all seasons including 2025
-    return api.get(`/api/elo/ratings?season=${season}&config=${config}`);
+    const timestamp = Date.now(); // Cache busting
+    return api.get(`/api/elo/ratings?season=${season}&config=${config}&_t=${timestamp}`);
   },
   getTeamEloHistory: (team, seasons = [2020, 2021, 2022, 2023, 2024]) => {
     const seasonParams = seasons.map(s => `seasons=${s}`).join('&');
-    return api.get(`/api/elo/team/${team}?${seasonParams}`);
+    const timestamp = Date.now(); // Cache busting
+    return api.get(`/api/elo/teams/${team}/history?${seasonParams}&_t=${timestamp}`);
   },
   getEloSeasonSummary: (season = 2024) => {
-    // Use the real API for all seasons including 2025
     return api.get(`/api/elo/season-summary?season=${season}`);
   },
   

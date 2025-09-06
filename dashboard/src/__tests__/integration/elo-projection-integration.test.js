@@ -16,7 +16,7 @@ jest.mock('axios');
 const mockedAxios = axios;
 
 // Mock the API service
-jest.mock('../services/api', () => ({
+jest.mock('../../services/api', () => ({
   apiService: {
     getLiveGames: jest.fn(),
     getEloRatings: jest.fn(),

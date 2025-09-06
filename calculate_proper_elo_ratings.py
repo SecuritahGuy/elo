@@ -229,7 +229,7 @@ def store_proper_elo_results(team_ratings: Dict[str, float], team_stats: Dict[st
         years: Years processed
         backtest_result: Backtest results
     """
-    db_path = Path("artifacts/stats/nfl_elo_stats.db")
+    db_path = Path("sportsedge_unified.db")
     db_path.parent.mkdir(parents=True, exist_ok=True)
     
     conn = sqlite3.connect(db_path)

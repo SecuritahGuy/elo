@@ -37,7 +37,7 @@ const TeamRankings = () => {
   const loadSeasons = async () => {
     try {
       const response = await apiService.getEloSeasons();
-      const availableSeasons = response.data.seasons || [];
+      const availableSeasons = response.data.seasons?.map(s => s.season || s) || [];
       
       // If no seasons from API, use default recent seasons
       if (availableSeasons.length === 0) {

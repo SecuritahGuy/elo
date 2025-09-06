@@ -16,7 +16,7 @@ import {
 } from 'lucide-react';
 import apiService from '../services/api';
 
-const ExpertPicks = () => {
+const ExpertPicks = ({ sport = 'nfl' }) => {
   const [experts, setExperts] = useState([]);
   const [picks, setPicks] = useState([]);
   const [analytics, setAnalytics] = useState(null);
@@ -24,33 +24,44 @@ const ExpertPicks = () => {
   const [error, setError] = useState(null);
   const [selectedExpert, setSelectedExpert] = useState(null);
   const [filters, setFilters] = useState({
-    league: 'nfl',
     result: 'all',
     limit: 50
   });
 
   useEffect(() => {
     loadData();
-  }, [filters]);
+  }, [sport, filters]);
 
   const loadData = async () => {
     try {
       setLoading(true);
       setError(null);
 
-      // Load experts, picks, and analytics in parallel
-      const [expertsRes, picksRes, analyticsRes] = await Promise.all([
-        apiService.getActionNetworkExperts(filters.league, 20),
-        apiService.getActionNetworkPicks(filters.league, filters.limit, null, filters.result),
-        apiService.getActionNetworkAnalytics(filters.league)
+      // Load experts and picks
+      const [expertsRes, picksRes] = await Promise.all([
+        apiService.getActionNetworkExperts(sport, 20),
+        apiService.getActionNetworkPicks(sport, filters.limit, null, filters.result)
       ]);
 
       setExperts(expertsRes.data.experts || []);
       setPicks(picksRes.data.picks || []);
-      setAnalytics(analyticsRes.data);
+      
+      // Calculate analytics from picks data
+      const picksData = picksRes.data.picks || [];
+      const totalPicks = picksData.length;
+      const wins = picksData.filter(pick => pick.result === 'win').length;
+      const winRate = totalPicks > 0 ? (wins / totalPicks) * 100 : 0;
+      const totalUnitsNet = picksData.reduce((sum, pick) => sum + (pick.units_net || 0), 0);
+      
+      setAnalytics({
+        total_picks: totalPicks,
+        win_rate: winRate,
+        units_net: totalUnitsNet
+      });
     } catch (err) {
       console.error('Error loading Action Network data:', err);
-      setError('Failed to load expert picks data');
+      console.error('Error details:', err.message, err.response?.data);
+      setError(`Failed to load expert picks data: ${err.message}`);
     } finally {
       setLoading(false);
     }
@@ -120,13 +131,14 @@ const ExpertPicks = () => {
             <div className="flex items-center space-x-2">
               <Filter className="h-5 w-5 text-gray-400" />
               <select
-                value={filters.league}
-                onChange={(e) => setFilters({...filters, league: e.target.value})}
+                value={sport}
+                onChange={(e) => window.location.reload()} // Simple reload for now
                 className="border border-gray-300 rounded-md px-3 py-2 text-sm"
               >
                 <option value="nfl">NFL</option>
                 <option value="mlb">MLB</option>
-                <option value="wnba">WNBA</option>
+                <option value="nba">NBA</option>
+                <option value="nhl">NHL</option>
               </select>
             </div>
             <div className="flex items-center space-x-2">
@@ -156,7 +168,7 @@ const ExpertPicks = () => {
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">Total Picks</p>
                 <p className="text-2xl font-bold text-gray-900">
-                  {analytics.league_summary?.total_picks || 0}
+                  {analytics.total_picks || 0}
                 </p>
               </div>
             </div>
@@ -170,7 +182,7 @@ const ExpertPicks = () => {
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">Win Rate</p>
                 <p className="text-2xl font-bold text-gray-900">
-                  {analytics.league_summary?.win_rate?.toFixed(1) || 0}%
+                  {analytics.win_rate?.toFixed(1) || 0}%
                 </p>
               </div>
             </div>
@@ -184,7 +196,7 @@ const ExpertPicks = () => {
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">Units Net</p>
                 <p className="text-2xl font-bold text-gray-900">
-                  {analytics.league_summary?.total_units_net?.toFixed(2) || 0}
+                  {analytics.units_net?.toFixed(2) || 0}
                 </p>
               </div>
             </div>
@@ -217,9 +229,9 @@ const ExpertPicks = () => {
             <div className="space-y-4">
               {experts.slice(0, 10).map((expert, index) => (
                 <div
-                  key={expert.an_expert_id || `expert-${index}`}
+                  key={expert.id || `expert-${index}`}
                   className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer"
-                  onClick={() => expert.an_expert_id && handleExpertClick(expert.an_expert_id)}
+                  onClick={() => expert.id && handleExpertClick(expert.id)}
                 >
                   <div className="flex items-center space-x-4">
                     <div className="flex items-center justify-center w-8 h-8 bg-nfl-primary text-white rounded-full text-sm font-bold">
@@ -228,21 +240,21 @@ const ExpertPicks = () => {
                     <div>
                       <div className="flex items-center space-x-2">
                         <h3 className="font-medium text-gray-900">{expert.name}</h3>
-                        {expert.is_verified && (
+                        {expert.verified && (
                           <Star className="h-4 w-4 text-blue-500" />
                         )}
                       </div>
                       <p className="text-sm text-gray-600">
-                        {expert.total_picks} picks • {expert.win_rate?.toFixed(1)}% win rate
+                        {expert.followers?.toLocaleString()} followers
                       </p>
                     </div>
                   </div>
                   <div className="text-right">
                     <p className="text-sm font-medium text-gray-900">
-                      {formatUnits(expert.total_units_net)} units
+                      @{expert.username}
                     </p>
                     <p className="text-xs text-gray-600">
-                      {expert.followers?.toLocaleString()} followers
+                      Expert
                     </p>
                   </div>
                 </div>

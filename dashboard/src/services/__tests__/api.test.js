@@ -57,9 +57,73 @@ describe('API Service', () => {
     });
   });
 
+  describe('NFL-Specific Endpoints', () => {
+    it('should get NFL teams', async () => {
+      const mockResponse = { data: [{ team: 'PHI', name: 'Eagles' }] };
+      mockedAxios.get.mockResolvedValue(mockResponse);
+
+      const result = await apiService.getNFLTeams();
+
+      expect(mockedAxios.get).toHaveBeenCalledWith('/api/sports/nfl/teams');
+      expect(result).toEqual(mockResponse);
+    });
+
+    it('should get NFL games', async () => {
+      const mockResponse = { data: [{ game: 'PHI vs DAL' }] };
+      mockedAxios.get.mockResolvedValue(mockResponse);
+
+      const result = await apiService.getNFLGames();
+
+      expect(mockedAxios.get).toHaveBeenCalledWith('/api/sports/nfl/games');
+      expect(result).toEqual(mockResponse);
+    });
+
+    it('should get NFL dashboard', async () => {
+      const mockResponse = { data: { live_games: [], upcoming_games: [] } };
+      mockedAxios.get.mockResolvedValue(mockResponse);
+
+      const result = await apiService.getNFLDashboard();
+
+      expect(mockedAxios.get).toHaveBeenCalledWith('/api/sports/nfl/dashboard');
+      expect(result).toEqual(mockResponse);
+    });
+
+    it('should get NFL standings', async () => {
+      const mockResponse = { data: [{ team: 'PHI', wins: 10, losses: 2 }] };
+      mockedAxios.get.mockResolvedValue(mockResponse);
+
+      const result = await apiService.getNFLStandings();
+
+      expect(mockedAxios.get).toHaveBeenCalledWith('/api/sports/nfl/standings');
+      expect(result).toEqual(mockResponse);
+    });
+  });
+
+  describe('Multi-Sport Endpoints (Expert Picks)', () => {
+    it('should get available sports', async () => {
+      const mockResponse = { data: ['nfl', 'nba', 'mlb'] };
+      mockedAxios.get.mockResolvedValue(mockResponse);
+
+      const result = await apiService.getSports();
+
+      expect(mockedAxios.get).toHaveBeenCalledWith('/api/sports');
+      expect(result).toEqual(mockResponse);
+    });
+
+    it('should get sport expert picks', async () => {
+      const mockResponse = { data: [{ expert: 'John Doe', pick: 'PHI' }] };
+      mockedAxios.get.mockResolvedValue(mockResponse);
+
+      const result = await apiService.getSportExpertPicks('nfl');
+
+      expect(mockedAxios.get).toHaveBeenCalledWith('/api/sports/nfl/expert-picks');
+      expect(result).toEqual(mockResponse);
+    });
+  });
+
   describe('ELO Ratings', () => {
     it('should get ELO seasons', async () => {
-      const mockResponse = { data: [2024, 2025] };
+      const mockResponse = { data: { seasons: [2024, 2025] } };
       mockedAxios.get.mockResolvedValue(mockResponse);
 
       const result = await apiService.getEloSeasons();
@@ -69,22 +133,22 @@ describe('API Service', () => {
     });
 
     it('should get ELO ratings with default parameters', async () => {
-      const mockResponse = { data: [{ team: 'PHI', rating: 1768.4 }] };
+      const mockResponse = { data: { ratings: [{ team: { abbreviation: 'PHI' }, rating: 1768.4 }] } };
       mockedAxios.get.mockResolvedValue(mockResponse);
 
       const result = await apiService.getEloRatings();
 
-      expect(mockedAxios.get).toHaveBeenCalledWith('/api/elo/ratings?season=2024&config=baseline');
+      expect(mockedAxios.get).toHaveBeenCalledWith(expect.stringMatching(/\/api\/elo\/ratings\?season=2024&config=baseline&_t=\d+/));
       expect(result).toEqual(mockResponse);
     });
 
     it('should get ELO ratings with custom parameters', async () => {
-      const mockResponse = { data: [{ team: 'PHI', rating: 1768.4 }] };
+      const mockResponse = { data: { ratings: [{ team: { abbreviation: 'PHI' }, rating: 1768.4 }] } };
       mockedAxios.get.mockResolvedValue(mockResponse);
 
-      const result = await apiService.getEloRatings(2025, 'weather_only');
+      const result = await apiService.getEloRatings(2025, 'comprehensive');
 
-      expect(mockedAxios.get).toHaveBeenCalledWith('/api/elo/ratings?season=2025&config=weather_only');
+      expect(mockedAxios.get).toHaveBeenCalledWith(expect.stringMatching(/\/api\/elo\/ratings\?season=2025&config=comprehensive&_t=\d+/));
       expect(result).toEqual(mockResponse);
     });
 
@@ -94,7 +158,7 @@ describe('API Service', () => {
 
       const result = await apiService.getTeamEloHistory('PHI', [2024, 2025]);
 
-      expect(mockedAxios.get).toHaveBeenCalledWith('/api/elo/team/PHI?seasons=2024&seasons=2025');
+      expect(mockedAxios.get).toHaveBeenCalledWith(expect.stringMatching(/\/api\/elo\/teams\/PHI\/history\?seasons=2024&seasons=2025&_t=\d+/));
       expect(result).toEqual(mockResponse);
     });
 
@@ -105,6 +169,16 @@ describe('API Service', () => {
       const result = await apiService.getTeamComparison(['PHI', 'DAL'], 2024);
 
       expect(mockedAxios.get).toHaveBeenCalledWith('/api/elo/compare?teams=PHI&teams=DAL&season=2024');
+      expect(result).toEqual(mockResponse);
+    });
+
+    it('should recalculate ELO ratings', async () => {
+      const mockResponse = { data: { message: 'ELO ratings recalculated successfully' } };
+      mockedAxios.post.mockResolvedValue(mockResponse);
+
+      const result = await apiService.recalculateEloRatings();
+
+      expect(mockedAxios.post).toHaveBeenCalledWith('/api/elo/recalculate');
       expect(result).toEqual(mockResponse);
     });
   });

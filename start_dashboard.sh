@@ -5,7 +5,7 @@ echo "🏈 NFL ELO DASHBOARD STARTUP"
 echo "=============================="
 
 # Check if we're in the right directory
-if [ ! -f "api_server.py" ]; then
+if [ ! -f "enhanced_api_server.py" ]; then
     echo "❌ Error: Please run this script from the SportsEdge root directory"
     exit 1
 fi
@@ -35,17 +35,17 @@ cleanup() {
 # Set up signal handler
 trap cleanup SIGINT SIGTERM
 
-# Start API server
-echo "🚀 Starting API server..."
-python api_server.py &
+# Start Enhanced Multi-Sport API server
+echo "🚀 Starting Enhanced Multi-Sport API server..."
+python enhanced_api_server.py &
 API_PID=$!
-echo "✅ API server started (PID: $API_PID)"
+echo "✅ Enhanced API server started (PID: $API_PID)"
 
 # Wait for API to be ready
-echo "⏳ Waiting for API server to be ready..."
+echo "⏳ Waiting for Enhanced API server to be ready..."
 for i in {1..30}; do
-    if curl -s http://localhost:8000/ > /dev/null 2>&1; then
-        echo "✅ API server is ready!"
+    if curl -s http://localhost:5001/api/health > /dev/null 2>&1; then
+        echo "✅ Enhanced API server is ready!"
         break
     fi
     sleep 1
@@ -74,17 +74,19 @@ LOCAL_IP=$(ifconfig | grep "inet " | grep -v 127.0.0.1 | awk '{print $2}' | head
 
 # Display status
 echo ""
-echo "🎉 DASHBOARD IS READY!"
-echo "======================"
+echo "🎉 MULTI-SPORT DASHBOARD IS READY!"
+echo "=================================="
 echo "🌐 Dashboard (Local): http://localhost:3000"
 echo "🌐 Dashboard (Network): http://${LOCAL_IP}:3000"
-echo "🔧 API Server (Local): http://localhost:8000"
-echo "🔧 API Server (Network): http://${LOCAL_IP}:8000"
-echo "📚 API Docs: http://${LOCAL_IP}:8000/docs"
+echo "🔧 Enhanced API (Local): http://localhost:5001"
+echo "🔧 Enhanced API (Network): http://${LOCAL_IP}:5001"
+echo "📚 API Health: http://${LOCAL_IP}:5001/api/health"
+echo "🏈 NFL Teams: http://${LOCAL_IP}:5001/api/sports/nfl/teams"
+echo "🏀 NBA Teams: http://${LOCAL_IP}:5001/api/sports/nba/teams"
 echo ""
 echo "💡 Other devices on your network can access:"
 echo "   Dashboard: http://${LOCAL_IP}:3000"
-echo "   API: http://${LOCAL_IP}:8000"
+echo "   Enhanced API: http://${LOCAL_IP}:5001"
 echo ""
 echo "⌨️ Press Ctrl+C to stop all services"
 echo ""
@@ -96,11 +98,11 @@ while true; do
     echo "📊 DASHBOARD STATUS - $(date)"
     echo "================================"
     
-    # Check API status
-    if curl -s http://localhost:8000/ > /dev/null 2>&1; then
-        echo "✅ API Server: Running"
+    # Check Enhanced API status
+    if curl -s http://localhost:5001/api/health > /dev/null 2>&1; then
+        echo "✅ Enhanced API Server: Running"
     else
-        echo "❌ API Server: Not responding"
+        echo "❌ Enhanced API Server: Not responding"
     fi
     
     # Check React status
@@ -111,5 +113,5 @@ while true; do
     fi
     
     echo "🌐 Dashboard: http://localhost:3000 (Local) | http://${LOCAL_IP}:3000 (Network)"
-    echo "🔧 API: http://localhost:8000 (Local) | http://${LOCAL_IP}:8000 (Network)"
+    echo "🔧 Enhanced API: http://localhost:5001 (Local) | http://${LOCAL_IP}:5001 (Network)"
 done

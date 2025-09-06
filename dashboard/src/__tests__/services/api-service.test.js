@@ -69,7 +69,7 @@ describe('API Service Tests', () => {
 
       const response = await apiService.getTeamEloHistory('KC', [2024, 2025]);
 
-      expect(mockedAxios.get).toHaveBeenCalledWith('/api/elo/team/KC?seasons=2024&seasons=2025');
+      expect(mockedAxios.get).toHaveBeenCalledWith(expect.stringMatching(/\/api\/elo\/teams\/KC\/history\?seasons=2024&seasons=2025&_t=\d+/));
       expect(response.data.elo_history).toHaveLength(2);
     });
 
@@ -78,7 +78,7 @@ describe('API Service Tests', () => {
 
       await apiService.getTeamEloHistory('KC');
 
-      expect(mockedAxios.get).toHaveBeenCalledWith('/api/elo/team/KC?seasons=2020&seasons=2021&seasons=2022&seasons=2023&seasons=2024');
+      expect(mockedAxios.get).toHaveBeenCalledWith(expect.stringMatching(/\/api\/elo\/teams\/KC\/history\?seasons=2020&seasons=2021&seasons=2022&seasons=2023&seasons=2024&_t=\d+/));
     });
   });
 

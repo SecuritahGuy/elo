@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 class EloDataService:
     """Service for retrieving ELO ratings and related data."""
     
-    def __init__(self, db_path: str = "artifacts/stats/nfl_elo_stats.db"):
+    def __init__(self, db_path: str = "../../nfl_elo.db"):
         self.db_path = Path(db_path)
         if not self.db_path.exists():
             raise FileNotFoundError(f"Database not found: {self.db_path}")
@@ -57,7 +57,7 @@ class EloDataService:
         
         Args:
             season: Season year
-            config_name: Configuration name (baseline, weather_only, etc.)
+            config_name: Configuration name (baseline, weather_only, etc.) - ignored for now
             
         Returns:
             List of team ratings with metadata
@@ -66,13 +66,13 @@ class EloDataService:
             conn = sqlite3.connect(self.db_path)
             cursor = conn.cursor()
             
-            # Get ratings from database
+            # Get ratings from database (no config_name column exists)
             cursor.execute('''
                 SELECT team, rating, wins, losses, win_pct, rating_change
                 FROM team_ratings
-                WHERE season = ? AND config_name = ?
+                WHERE season = ?
                 ORDER BY rating DESC
-            ''', (season, config_name))
+            ''', (season,))
             
             ratings = []
             for i, row in enumerate(cursor.fetchall(), 1):

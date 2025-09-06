@@ -1,8 +1,10 @@
-# 🏈 SportsEdge - Comprehensive Roadmap 2025
+# 🏈 SportsEdge - NFL ELO Analytics System - Comprehensive Roadmap 2025
 
 ## 🎉 **PROJECT STATUS: PRODUCTION READY WITH ADVANCED REAL-TIME FEATURES** ✅
 
-**Overall Progress**: **100% Complete** - Core ELO system + Environmental integrations + ML research + 2025 prediction capability + Full web dashboard + Real-time data collection + Advanced visualizations + Injury data integration + Automated cron system + **Data Leakage Prevention + Realistic Accuracy Validation + Live Game Tracking + ELO Projections + Weekly Schedule Dashboard + Comprehensive Testing + API Reliability**
+**⚠️ PROJECT SCOPE**: This project focuses exclusively on **NFL ELO ratings and analytics**. MLB functionality is handled by a separate project (`/Users/tim/Code/Personal/mlb_elo/`).
+
+**Overall Progress**: **100% Complete** - Core NFL ELO system + Environmental integrations + ML research + 2025 prediction capability + Full web dashboard + Real-time data collection + Advanced visualizations + Injury data integration + Automated cron system + **Data Leakage Prevention + Realistic Accuracy Validation + Live Game Tracking + ELO Projections + Weekly Schedule Dashboard + Comprehensive Testing + API Reliability**
 
 ### 📊 **Latest Performance Metrics (2021-2024, Proper Walk-Forward Backtesting)**
 - ✅ **Realistic Accuracy**: 60.3% (no data leakage)
@@ -579,21 +581,24 @@ curl "http://localhost:8000/api/system/cron-status"
    - Weather-specific matchups
    - Rest advantage interactions
 
-### **Multi-Sport Extension**
+### **Multi-Sport Extension** ⚠️ **SEPARATE PROJECTS**
 **Goal**: Extend framework to other sports
 
+**⚠️ IMPORTANT NOTE**: MLB functionality will be handled by a separate API project (`/Users/tim/Code/Personal/mlb_elo/`). This SportsEdge project focuses exclusively on NFL ELO ratings.
+
 **Tasks**:
-1. **NBA Integration**
+1. **NBA Integration** (Future consideration)
    - Adapt ELO system for basketball
    - NBA-specific factors (home court, rest, etc.)
    - Cross-sport validation
 
-2. **MLB Integration**
-   - Baseball-specific adjustments
-   - Pitching rotation factors
-   - Weather impact analysis
+2. **MLB Integration** ❌ **SEPARATE PROJECT**
+   - **Note**: MLB ELO system is maintained in separate project
+   - **Location**: `/Users/tim/Code/Personal/mlb_elo/`
+   - **Status**: Independent development and testing
+   - **Integration**: Will be handled via separate API when needed
 
-3. **NHL Integration**
+3. **NHL Integration** (Future consideration)
    - Hockey-specific metrics
    - Goalie performance tracking
    - Power play efficiency
@@ -724,18 +729,19 @@ curl "http://localhost:8000/api/system/cron-status"
 ## 📝 **FINAL RECOMMENDATIONS**
 
 ### **Current System Status**
-- **Production Ready**: System is fully functional and validated
+- **Production Ready**: NFL ELO system is fully functional and validated
 - **Data Leakage Free**: Proper walk-forward methodology implemented
-- **Realistic Accuracy**: 60.3% accuracy (professional-grade)
+- **Realistic Accuracy**: 60.3% accuracy (professional-grade for NFL)
 - **Optimal Configuration**: 30% regression + Travel + QB adjustments
 - **ML Research Complete**: Comprehensive analysis with data leakage prevention
-- **2025 Ready**: Prediction system operational for 2025 season
-- **Dashboard Complete**: Full web interface with ELO ratings and team analysis
+- **2025 Ready**: NFL prediction system operational for 2025 season
+- **Dashboard Complete**: Full web interface with NFL ELO ratings and team analysis
 - **Network Access**: Accessible from any device on local network
 - **Advanced Visualizations**: Historical charts and trends analysis implemented
-- **Injury Data Integration**: Complete injury data system with API endpoints
-- **Automated Cron System**: Daily updates with failover protection
+- **Injury Data Integration**: Complete NFL injury data system with API endpoints
+- **Automated Cron System**: Daily NFL data updates with failover protection
 - **Rules Documentation**: Comprehensive project rules and findings documented
+- **MLB Separation**: MLB functionality maintained in separate project (`/Users/tim/Code/Personal/mlb_elo/`)
 
 ### **Focus Areas**
 - **System Stability**: Maintain current performance levels

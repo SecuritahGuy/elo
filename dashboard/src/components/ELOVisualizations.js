@@ -57,11 +57,12 @@ const ELOVisualizations = () => {
       
       // Load available seasons
       const seasonsResponse = await apiService.getEloSeasons();
-      setAvailableSeasons(seasonsResponse.data.seasons || [2020, 2021, 2022, 2023, 2024, 2025]);
+      const seasons = seasonsResponse.data.seasons?.map(s => s.season || s) || [2020, 2021, 2022, 2023, 2024, 2025];
+      setAvailableSeasons(seasons);
       
       // Load available teams
       const teamsResponse = await apiService.getEloRatings(selectedSeason);
-      const teams = teamsResponse.data.ratings?.map(team => team.team) || [];
+      const teams = teamsResponse.data.ratings?.map(team => team.team?.abbreviation || team.team) || [];
       setAvailableTeams(teams);
       
     } catch (err) {
@@ -182,13 +183,13 @@ const ELOVisualizations = () => {
       const ratings = ratingsResponse.data.ratings || [];
       
       const trends = selectedTeams.map(team => {
-        const teamRatingData = ratings.find(r => r.team === team);
+        const teamRatingData = ratings.find(r => r.team?.abbreviation === team || r.team === team);
         if (!teamRatingData) {
           return { team, trend: 'stable', change: 0, games: 0 };
         }
         
-        const change = teamRatingData.change || 0;
-        const games = (teamRatingData.wins || 0) + (teamRatingData.losses || 0);
+        const change = teamRatingData.rating_change || 0;
+        const games = (teamRatingData.record?.wins || 0) + (teamRatingData.record?.losses || 0);
         
         // For historical seasons with no data, create realistic trends
         let finalChange = change;
@@ -365,7 +366,7 @@ const ELOVisualizations = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-nfl-primary"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-nfl-primary" data-testid="loading-spinner"></div>
       </div>
     );
   }
@@ -558,23 +559,23 @@ const ELOVisualizations = () => {
           <div className="space-y-4">
             <div className="text-center p-4 bg-gray-50 rounded-lg">
               <p className="text-sm text-gray-600 mb-2">Week 1 Results (2025 Season)</p>
-              {weeklyChanges.length > 0 && weeklyChanges[0].gamesPlayed > 0 ? (
+              {weeklyChanges.length > 0 && weeklyChanges[0] && weeklyChanges[0].gamesPlayed > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div className="text-center">
                     <div className="text-2xl font-bold text-green-600">
-                      +{weeklyChanges[0].avgChange}
+                      +{weeklyChanges[0].avgChange || 0}
                     </div>
                     <div className="text-sm text-gray-600">Average Change</div>
                   </div>
                   <div className="text-center">
                     <div className="text-2xl font-bold text-blue-600">
-                      +{weeklyChanges[0].maxChange}
+                      +{weeklyChanges[0].maxChange || 0}
                     </div>
                     <div className="text-sm text-gray-600">Highest Gain</div>
                   </div>
                   <div className="text-center">
                     <div className="text-2xl font-bold text-gray-600">
-                      {weeklyChanges[0].gamesPlayed}
+                      {weeklyChanges[0].gamesPlayed || 0}
                     </div>
                     <div className="text-sm text-gray-600">Games Played</div>
                   </div>
