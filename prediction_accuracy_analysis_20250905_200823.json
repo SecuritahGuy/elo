@@ -1,0 +1,20 @@
+{
+  "overall_accuracy": 0.6213235294117647,
+  "total_games": 1088,
+  "correct_predictions": 676,
+  "confidence_analysis": {
+    "high_confidence": {
+      "games": 18,
+      "accuracy": 0.8888888888888888
+    },
+    "medium_confidence": {
+      "games": 119,
+      "accuracy": 0.7310924369747899
+    },
+    "low_confidence": {
+      "games": 951,
+      "accuracy": 0.6025236593059937
+    }
+  },
+  "season_analysis": {
+    

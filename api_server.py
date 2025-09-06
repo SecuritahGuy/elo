@@ -19,6 +19,9 @@ from ingest.nfl.elo_data_service import EloDataService
 # Import injury components
 from models.nfl_elo.injury_integration import InjuryImpactCalculator
 
+# Import ELO projection service
+from elo_projection_service import ELOProjectionService
+
 app = Flask(__name__)
 CORS(app)
 
@@ -31,6 +34,24 @@ analyzer = ActionNetworkAnalyzer()
 team_mapper = ActionNetworkTeamMapper()
 elo_service = EloDataService()
 injury_calculator = InjuryImpactCalculator()
+elo_projection_service = ELOProjectionService()
+
+@app.route('/', methods=['GET'])
+def root():
+    """Root endpoint - API information."""
+    return jsonify({
+        'message': 'NFL ELO Rating System API',
+        'version': '1.0.0',
+        'status': 'running',
+        'endpoints': {
+            'system_status': '/api/system/status',
+            'elo_ratings': '/api/elo/ratings',
+            'live_games': '/api/live/games',
+            'predictions': '/api/predictions/game/<home_team>/<away_team>',
+            'health': '/api/system/health'
+        },
+        'documentation': 'See /api/system/status for detailed system information'
+    })
 
 @app.route('/api/system/status', methods=['GET'])
 def get_system_status():
@@ -446,13 +467,90 @@ def recalculate_elo_ratings():
             'message': 'ELO calculation timed out',
             'timestamp': datetime.now().isoformat()
         }), 500
-    except Exception as e:
-        logger.error(f"Error recalculating ELO ratings: {e}")
+
+# ELO Projection endpoints
+@app.route('/api/elo/projections/<int:season>/<int:week>', methods=['GET'])
+def get_elo_projections(season, week):
+    """Get projected ELO ratings for a specific season and week."""
+    try:
+        projections = elo_projection_service.get_projections(season, week)
+        
+        if not projections:
+            # Generate projections if they don't exist
+            logger.info(f"Generating projections for season {season}, week {week}")
+            projections = elo_projection_service.project_week_elos(season, week)
+            if projections:
+                elo_projection_service.store_projections(projections, season)
+        
         return jsonify({
-            'status': 'error',
-            'message': str(e),
+            'season': season,
+            'week': week,
+            'projections': projections,
+            'count': len(projections),
             'timestamp': datetime.now().isoformat()
-        }), 500
+        })
+        
+    except Exception as e:
+        logger.error(f"Error getting ELO projections: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/elo/projections/generate', methods=['POST'])
+def generate_elo_projections():
+    """Generate ELO projections for all remaining weeks of a season."""
+    try:
+        data = request.get_json() or {}
+        season = data.get('season', 2025)
+        current_week = data.get('current_week')
+        
+        # Generate projections for all remaining weeks
+        elo_projection_service.project_all_weeks(season, current_week)
+        
+        return jsonify({
+            'message': f'ELO projections generated for season {season}',
+            'season': season,
+            'timestamp': datetime.now().isoformat()
+        })
+        
+    except Exception as e:
+        logger.error(f"Error generating ELO projections: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/elo/projections/team/<team>/<int:season>', methods=['GET'])
+def get_team_elo_projections(team, season):
+    """Get ELO projections for a specific team across all weeks."""
+    try:
+        conn = sqlite3.connect('nfl_elo.db')
+        cursor = conn.cursor()
+        
+        cursor.execute('''
+            SELECT week, projected_rating, confidence_score, projection_method
+            FROM projected_elo_ratings 
+            WHERE team = ? AND season = ?
+            ORDER BY week
+        ''', (team.upper(), season))
+        
+        projections = []
+        for row in cursor.fetchall():
+            projections.append({
+                'week': row[0],
+                'projected_rating': row[1],
+                'confidence_score': row[2],
+                'projection_method': row[3]
+            })
+        
+        conn.close()
+        
+        return jsonify({
+            'team': team.upper(),
+            'season': season,
+            'projections': projections,
+            'count': len(projections),
+            'timestamp': datetime.now().isoformat()
+        })
+        
+    except Exception as e:
+        logger.error(f"Error getting team ELO projections: {e}")
+        return jsonify({'error': str(e)}), 500
 
 @app.route('/api/system/cron-status', methods=['GET'])
 def get_cron_status():
@@ -952,6 +1050,248 @@ def get_injury_summary():
         
     except Exception as e:
         logger.error(f"Error getting injury summary: {e}")
+        return jsonify({'error': str(e)}), 500
+
+# Live game tracking endpoints
+@app.route('/api/live/games', methods=['GET'])
+def get_live_games():
+    """Get currently live games."""
+    try:
+        from live_nfl_data_integration import LiveNFLDataService
+        
+        # Initialize live data service
+        live_service = LiveNFLDataService()
+        
+        # Get live games (real data by default)
+        games = live_service.get_live_games(use_mock=False)
+        
+        # Convert to API format
+        games_data = []
+        for game in games:
+            metrics = live_service.calculate_live_metrics(game)
+            games_data.append({
+                'id': game.game_id,
+                'home_team': game.home_team,
+                'away_team': game.away_team,
+                'home_score': game.home_score,
+                'away_score': game.away_score,
+                'quarter': game.quarter,
+                'time_remaining': game.time_remaining,
+                'status': game.status,
+                'possession': game.possession,
+                'down': game.down,
+                'distance': game.distance,
+                'yard_line': game.yard_line,
+                'red_zone': game.red_zone,
+                'weather': game.weather,
+                'temperature': game.temperature,
+                'wind_speed': game.wind_speed,
+                'last_update': game.last_update,
+                'metrics': metrics
+            })
+        
+        return jsonify({
+            'games': games_data,
+            'timestamp': datetime.now().isoformat(),
+            'total_games': len(games_data),
+            'live_games': len([g for g in games_data if g['status'] == 'in_progress'])
+        })
+    except Exception as e:
+        logger.error(f"Error getting live games: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/live/games/<game_id>', methods=['GET'])
+def get_live_game(game_id):
+    """Get specific live game details."""
+    try:
+        from live_nfl_data_integration import LiveNFLDataService
+        
+        live_service = LiveNFLDataService()
+        games = live_service.get_live_games(use_mock=False)
+        
+        # Find the specific game
+        game = next((g for g in games if g.game_id == game_id), None)
+        
+        if not game:
+            return jsonify({'error': 'Live game not found'}), 404
+        
+        metrics = live_service.calculate_live_metrics(game)
+        
+        return jsonify({
+            'id': game.game_id,
+            'home_team': game.home_team,
+            'away_team': game.away_team,
+            'home_score': game.home_score,
+            'away_score': game.away_score,
+            'quarter': game.quarter,
+            'time_remaining': game.time_remaining,
+            'status': game.status,
+            'possession': game.possession,
+            'down': game.down,
+            'distance': game.distance,
+            'yard_line': game.yard_line,
+            'red_zone': game.red_zone,
+            'weather': game.weather,
+            'temperature': game.temperature,
+            'wind_speed': game.wind_speed,
+            'last_update': game.last_update,
+            'metrics': metrics
+        })
+    except Exception as e:
+        logger.error(f"Error getting live game {game_id}: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/live/games/<game_id>/stats', methods=['GET'])
+def get_live_game_stats(game_id):
+    """Get live game statistics."""
+    try:
+        from live_nfl_data_integration import LiveNFLDataService
+        
+        live_service = LiveNFLDataService()
+        games = live_service.get_live_games(use_mock=False)
+        
+        # Find the specific game
+        game = next((g for g in games if g.game_id == game_id), None)
+        
+        if not game:
+            return jsonify({'error': 'Live game not found'}), 404
+        
+        metrics = live_service.calculate_live_metrics(game)
+        
+        # Generate mock detailed stats
+        stats = {
+            'game_id': game_id,
+            'home_team': game.home_team,
+            'away_team': game.away_team,
+            'score': {
+                'home': game.home_score,
+                'away': game.away_score
+            },
+            'game_state': {
+                'quarter': game.quarter,
+                'time_remaining': game.time_remaining,
+                'status': game.status,
+                'possession': game.possession,
+                'down': game.down,
+                'distance': game.distance,
+                'yard_line': game.yard_line,
+                'red_zone': game.red_zone
+            },
+            'weather': {
+                'condition': game.weather,
+                'temperature': game.temperature,
+                'wind_speed': game.wind_speed
+            },
+            'metrics': metrics,
+            'last_update': game.last_update
+        }
+        
+        return jsonify(stats)
+    except Exception as e:
+        logger.error(f"Error getting live game stats {game_id}: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/live/games/<game_id>/predictions', methods=['GET'])
+def get_live_game_predictions(game_id):
+    """Get live game predictions."""
+    try:
+        from live_nfl_data_integration import LiveNFLDataService
+        
+        live_service = LiveNFLDataService()
+        games = live_service.get_live_games(use_mock=False)
+        
+        # Find the specific game
+        game = next((g for g in games if g.game_id == game_id), None)
+        
+        if not game:
+            return jsonify({'error': 'Live game not found'}), 404
+        
+        # Get ELO ratings for prediction
+        home_rating = elo_service.get_team_ratings_for_season(2025, 'baseline')
+        home_team_rating = next((r for r in home_rating if r['team'] == game.home_team), None)
+        away_team_rating = next((r for r in home_rating if r['team'] == game.away_team), None)
+        
+        if not home_team_rating or not away_team_rating:
+            return jsonify({'error': 'Team ratings not found'}), 404
+        
+        # Calculate live prediction
+        from models.nfl_elo.prediction_interface import NFLPredictionInterface
+        predictor = NFLPredictionInterface()
+        predictor.load_team_ratings([2025])
+        
+        prediction = predictor.predict_game(
+            game.home_team, game.away_team,
+            home_team_rating['rating'], away_team_rating['rating']
+        )
+        
+        # Add live game context
+        live_prediction = {
+            'game_id': game_id,
+            'home_team': game.home_team,
+            'away_team': game.away_team,
+            'current_score': {
+                'home': game.home_score,
+                'away': game.away_score
+            },
+            'game_state': {
+                'quarter': game.quarter,
+                'time_remaining': game.time_remaining,
+                'status': game.status
+            },
+            'prediction': prediction,
+            'live_metrics': live_service.calculate_live_metrics(game),
+            'timestamp': datetime.now().isoformat()
+        }
+        
+        return jsonify(live_prediction)
+    except Exception as e:
+        logger.error(f"Error getting live game predictions {game_id}: {e}")
+        return jsonify({'error': str(e)}), 500
+
+# Additional prediction endpoints
+@app.route('/api/predictions/game/<home_team>/<away_team>', methods=['GET'])
+def get_game_prediction(home_team, away_team):
+    """Get prediction for a specific game."""
+    try:
+        season = request.args.get('season', 2025, type=int)
+        week = request.args.get('week', 1, type=int)
+        
+        # Get ELO ratings for both teams
+        all_ratings = elo_service.get_team_ratings_for_season(season, 'baseline')
+        home_rating = next((r for r in all_ratings if r['team'] == home_team.upper()), None)
+        away_rating = next((r for r in all_ratings if r['team'] == away_team.upper()), None)
+        
+        if not home_rating or not away_rating:
+            return jsonify({'error': 'Team ratings not found'}), 404
+        
+        # Calculate prediction using the prediction interface
+        from models.nfl_elo.prediction_interface import NFLPredictionInterface
+        predictor = NFLPredictionInterface()
+        
+        # Load team ratings for the season
+        predictor.load_team_ratings([season])
+        
+        prediction = predictor.predict_game(
+            home_team.upper(), away_team.upper(), 
+            home_rating['rating'], away_rating['rating']
+        )
+        
+        return jsonify({
+            'home_team': home_team.upper(),
+            'away_team': away_team.upper(),
+            'season': season,
+            'week': week,
+            'home_win_probability': prediction['home_win_probability'],
+            'away_win_probability': prediction['away_win_probability'],
+            'predicted_winner': prediction['predicted_winner'],
+            'confidence': prediction['confidence'],
+            'expected_margin': prediction['expected_margin'],
+            'home_rating': prediction['home_rating'],
+            'away_rating': prediction['away_rating'],
+            'timestamp': datetime.now().isoformat()
+        })
+    except Exception as e:
+        logger.error(f"Error getting game prediction: {e}")
         return jsonify({'error': str(e)}), 500
 
 

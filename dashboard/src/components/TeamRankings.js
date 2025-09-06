@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import apiService from '../services/api';
 import { Trophy, TrendingUp, TrendingDown, Calendar, BarChart3, ExternalLink } from 'lucide-react';
@@ -7,12 +7,12 @@ const TeamRankings = () => {
   const navigate = useNavigate();
   const [rankings, setRankings] = useState([]);
   const [seasons, setSeasons] = useState([]);
-  const [selectedSeason, setSelectedSeason] = useState(2024);
+  const [selectedSeason, setSelectedSeason] = useState(2025);
   const [seasonSummary, setSeasonSummary] = useState(null);
   const [loading, setLoading] = useState(true);
   const [lastUpdated, setLastUpdated] = useState(null);
 
-  const loadRankingsData = async (season = selectedSeason) => {
+  const loadRankingsData = useCallback(async (season = selectedSeason) => {
     try {
       setLoading(true);
       
@@ -32,7 +32,7 @@ const TeamRankings = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [selectedSeason]);
 
   const loadSeasons = async () => {
     try {
@@ -63,7 +63,7 @@ const TeamRankings = () => {
     if (seasons.length > 0) {
       loadRankingsData();
     }
-  }, [seasons, selectedSeason]);
+  }, [seasons, selectedSeason, loadRankingsData]);
 
   const handleSeasonChange = (season) => {
     setSelectedSeason(parseInt(season));

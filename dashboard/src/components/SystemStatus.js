@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Activity, Settings, RefreshCw, CheckCircle, XCircle, AlertTriangle } from 'lucide-react';
+import { Activity, RefreshCw, CheckCircle, XCircle, AlertTriangle } from 'lucide-react';
 import apiService from '../services/api';
 
 const SystemStatus = () => {

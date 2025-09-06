@@ -98,7 +98,7 @@ class CacheService {
     let expiredCount = 0;
     let activeCount = 0;
 
-    for (const [key, item] of this.cache.entries()) {
+    for (const [, item] of this.cache.entries()) {
       if (now > item.expiresAt) {
         expiredCount++;
       } else {

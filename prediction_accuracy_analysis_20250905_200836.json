@@ -1,0 +1,195 @@
+{
+  "overall_accuracy": 0.6084558823529411,
+  "total_games": 1088,
+  "correct_predictions": 662,
+  "confidence_analysis": {
+    "high_confidence": {
+      "games": 26,
+      "accuracy": 0.8461538461538461
+    },
+    "medium_confidence": {
+      "games": 152,
+      "accuracy": 0.7763157894736842
+    },
+    "low_confidence": {
+      "games": 910,
+      "accuracy": 0.5736263736263736
+    }
+  },
+  "season_analysis": {
+    "2021": {
+      "total_games": 272,
+      "correct_predictions": 178,
+      "accuracy": 0.6544117647058824,
+      "high_confidence_games": 10,
+      "high_confidence_accuracy": 0.9,
+      "medium_confidence_games": 42,
+      "medium_confidence_accuracy": 0.7857142857142857,
+      "low_confidence_games": 220,
+      "low_confidence_accuracy": 0.6181818181818182
+    },
+    "2022": {
+      "total_games": 272,
+      "correct_predictions": 161,
+      "accuracy": 0.5919117647058824,
+      "high_confidence_games": 3,
+      "high_confidence_accuracy": 1.0,
+      "medium_confidence_games": 39,
+      "medium_confidence_accuracy": 0.7692307692307693,
+      "low_confidence_games": 230,
+      "low_confidence_accuracy": 0.5565217391304348
+    },
+    "2023": {
+      "total_games": 272,
+      "correct_predictions": 155,
+      "accuracy": 0.5698529411764706,
+      "high_confidence_games": 6,
+      "high_confidence_accuracy": 0.8333333333333334,
+      "medium_confidence_games": 32,
+      "medium_confidence_accuracy": 0.8125,
+      "low_confidence_games": 234,
+      "low_confidence_accuracy": 0.5299145299145299
+    },
+    "2024": {
+      "total_games": 272,
+      "correct_predictions": 168,
+      "accuracy": 0.6176470588235294,
+      "high_confidence_games": 7,
+      "high_confidence_accuracy": 0.7142857142857143,
+      "medium_confidence_games": 39,
+      "medium_confidence_accuracy": 0.7435897435897436,
+      "low_confidence_games": 226,
+      "low_confidence_accuracy": 0.5929203539823009
+    }
+  },
+  "weekly_analysis": {
+    "1": {
+      "total_games": 16,
+      "correct_predictions": 10,
+      "accuracy": 0.625,
+      "avg_confidence": 0.17461509938342812
+    },
+    "2": {
+      "total_games": 16,
+      "correct_predictions": 12,
+      "accuracy": 0.75,
+      "avg_confidence": 0.1842686407869721
+    },
+    "3": {
+      "total_games": 16,
+      "correct_predictions": 7,
+      "accuracy": 0.4375,
+      "avg_confidence": 0.20741296122084735
+    },
+    "4": {
+      "total_games": 16,
+      "correct_predictions": 8,
+      "accuracy": 0.5,
+      "avg_confidence": 0.1985168412203595
+    },
+    "5": {
+      "total_games": 16,
+      "correct_predictions": 8,
+      "accuracy": 0.5,
+      "avg_confidence": 0.22306331594043433
+    },
+    "6": {
+      "total_games": 16,
+      "correct_predictions": 11,
+      "accuracy": 0.6875,
+      "avg_confidence": 0.2659953037729848
+    },
+    "7": {
+      "total_games": 16,
+      "correct_predictions": 10,
+      "accuracy": 0.625,
+      "avg_confidence": 0.24919083783638046
+    },
+    "8": {
+      "total_games": 16,
+      "correct_predictions": 11,
+      "accuracy": 0.6875,
+      "avg_confidence": 0.22139099547643804
+    },
+    "9": {
+      "total_games": 16,
+      "correct_predictions": 10,
+      "accuracy": 0.625,
+      "avg_confidence": 0.2480898276467731
+    },
+    "10": {
+      "total_games": 16,
+      "correct_predictions": 11,
+      "accuracy": 0.6875,
+      "avg_confidence": 0.2707307194241553
+    },
+    "11": {
+      "total_games": 16,
+      "correct_predictions": 14,
+      "accuracy": 0.875,
+      "avg_confidence": 0.27481144106439626
+    },
+    "12": {
+      "total_games": 16,
+      "correct_predictions": 11,
+      "accuracy": 0.6875,
+      "avg_confidence": 0.27795062706838003
+    },
+    "13": {
+      "total_games": 16,
+      "correct_predictions": 12,
+      "accuracy": 0.75,
+      "avg_confidence": 0.29940481918795436
+    },
+    "14": {
+      "total_games": 16,
+      "correct_predictions": 7,
+      "accuracy": 0.4375,
+      "avg_confidence": 0.24919491540907956
+    },
+    "15": {
+      "total_games": 16,
+      "correct_predictions": 8,
+      "accuracy": 0.5,
+      "avg_confidence": 0.29508743359857154
+    },
+    "16": {
+      "total_games": 16,
+      "correct_predictions": 6,
+      "accuracy": 0.375,
+      "avg_confidence": 0.259147190441478
+    },
+    "17": {
+      "total_games": 16,
+      "correct_predictions": 12,
+      "accuracy": 0.75,
+      "avg_confidence": 0.2594823332388918
+    }
+  },
+  "calibration_analysis": {
+    "0.0-0.2": {
+      "total_games": 532,
+      "accuracy": 0.5225563909774437,
+      "expected_accuracy": 0.1,
+      "calibration_error": 0.4225563909774437
+    },
+    "0.2-0.4": {
+      "total_games": 378,
+      "accuracy": 0.6455026455026455,
+      "expected_accuracy": 0.30000000000000004,
+      "calibration_error": 0.3455026455026454
+    },
+    "0.4-0.6": {
+      "total_games": 152,
+      "accuracy": 0.7763157894736842,
+      "expected_accuracy": 0.5,
+      "calibration_error": 0.2763157894736842
+    },
+    "0.6-0.8": {
+      "total_games": 26,
+      "accuracy": 0.8461538461538461,
+      "expected_accuracy": 0.7,
+      "calibration_error": 0.1461538461538462
+    }
+  }
+}

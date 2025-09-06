@@ -14,7 +14,7 @@ const Dashboard = () => {
       setLoading(true);
       
       // Load ELO team rankings (top 10)
-      const rankingsResponse = await apiService.getEloRatings(2024);
+      const rankingsResponse = await apiService.getEloRatings(2025);
       setTeamRankings(rankingsResponse.data.ratings?.slice(0, 10) || []);
       
       // Load recent picks (first 6)

@@ -34,15 +34,23 @@ const PerformanceMonitoring = () => {
       // Get system status
       const systemResponse = await enhancedApiService.getSystemStatus();
       
-      // Get performance metrics (mock for now)
-      const performanceMetrics = {
-        responseTime: Math.random() * 200 + 50, // 50-250ms
-        throughput: Math.random() * 1000 + 500, // 500-1500 req/min
-        errorRate: Math.random() * 2, // 0-2%
-        uptime: 99.9 + Math.random() * 0.1, // 99.9-100%
-        memoryUsage: Math.random() * 30 + 40, // 40-70%
-        cpuUsage: Math.random() * 20 + 10 // 10-30%
-      };
+      // Get real performance metrics from API
+      let performanceMetrics = null;
+      try {
+        const perfResponse = await enhancedApiService.getPerformanceMetrics();
+        performanceMetrics = perfResponse.data;
+      } catch (error) {
+        console.warn('Performance metrics not available:', error);
+        // Use basic metrics from system status if available
+        performanceMetrics = {
+          responseTime: 0,
+          throughput: 0,
+          errorRate: 0,
+          uptime: 0,
+          memoryUsage: 0,
+          cpuUsage: 0
+        };
+      }
 
       setMetrics({
         cacheStats,

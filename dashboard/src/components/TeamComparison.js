@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import apiService from '../services/api';
-import { Users, TrendingUp, TrendingDown, BarChart3, Target, Calendar, RefreshCw } from 'lucide-react';
+import { TrendingUp, TrendingDown, BarChart3, Calendar, RefreshCw } from 'lucide-react';
 
 const TeamComparison = () => {
   const [selectedTeams, setSelectedTeams] = useState([]);
-  const [availableTeams, setAvailableTeams] = useState([]);
+  const [availableTeams] = useState([]);
   const [comparisonData, setComparisonData] = useState([]);
   const [season, setSeason] = useState(2025);
   const [loading, setLoading] = useState(false);
@@ -46,7 +46,7 @@ const TeamComparison = () => {
     { code: 'WAS', name: 'Washington Commanders' }
   ];
 
-  const loadComparisonData = async () => {
+  const loadComparisonData = useCallback(async () => {
     if (selectedTeams.length === 0) {
       setComparisonData([]);
       return;
@@ -63,11 +63,11 @@ const TeamComparison = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [selectedTeams, season]);
 
   useEffect(() => {
     loadComparisonData();
-  }, [selectedTeams, season]);
+  }, [loadComparisonData]);
 
   const handleTeamToggle = (teamCode) => {
     setSelectedTeams(prev => {

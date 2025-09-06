@@ -30,4 +30,10 @@ module.exports = {
   transform: {
     '^.+\\.(js|jsx)$': 'babel-jest',
   },
+  extensionsToTreatAsEsm: ['.jsx'],
+  globals: {
+    'ts-jest': {
+      useESM: true
+    }
+  }
 };

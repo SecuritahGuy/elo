@@ -1,20 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { 
   ArrowLeft, 
   Trophy, 
   Users, 
-  Calendar, 
   TrendingUp, 
-  TrendingDown,
   Target,
   BarChart3,
-  Activity,
-  Shield,
-  User,
-  Clock,
-  MapPin,
-  Wind,
   Cloud
 } from 'lucide-react';
 import { 
@@ -25,8 +17,6 @@ import {
   CartesianGrid, 
   Tooltip, 
   ResponsiveContainer,
-  BarChart,
-  Bar,
   PieChart,
   Pie,
   Cell
@@ -42,15 +32,9 @@ const TeamDetail = () => {
   const [roster, setRoster] = useState([]);
   const [games, setGames] = useState([]);
   const [eloHistory, setEloHistory] = useState([]);
-  const [selectedSeason, setSelectedSeason] = useState(2024);
+  const [selectedSeason, setSelectedSeason] = useState(2025);
 
-  useEffect(() => {
-    if (team) {
-      loadTeamData();
-    }
-  }, [team, selectedSeason]);
-
-  const loadTeamData = async () => {
+  const loadTeamData = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -90,59 +74,13 @@ const TeamDetail = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [team, selectedSeason]);
 
-  const generateMockGames = (team, season) => {
-    const opponents = ['DAL', 'NYG', 'WAS', 'BUF', 'MIA', 'NE', 'NYJ', 'BAL', 'CIN', 'CLE', 'PIT', 'SF', 'LAR', 'SEA', 'ARI', 'ATL', 'CAR', 'NO'];
-    const games = [];
-    
-    for (let week = 1; week <= 18; week++) {
-      const opponent = opponents[Math.floor(Math.random() * opponents.length)];
-      const isHome = Math.random() > 0.5;
-      const teamScore = Math.floor(Math.random() * 21) + 14;
-      const opponentScore = Math.floor(Math.random() * 21) + 14;
-      const won = teamScore > opponentScore;
-      
-      games.push({
-        week,
-        opponent,
-        isHome,
-        teamScore,
-        opponentScore,
-        won,
-        date: new Date(2024, 8, week * 7).toISOString().split('T')[0],
-        weather: Math.random() > 0.7 ? 'Rain' : 'Clear',
-        temperature: Math.floor(Math.random() * 40) + 30
-      });
+  useEffect(() => {
+    if (team) {
+      loadTeamData();
     }
-    
-    return games;
-  };
-
-  const generateMockRoster = (team) => {
-    const positions = ['QB', 'RB', 'WR', 'TE', 'OL', 'DL', 'LB', 'CB', 'S', 'K', 'P'];
-    const roster = [];
-    
-    positions.forEach((position, index) => {
-      const playerCount = position === 'OL' ? 5 : position === 'DL' ? 4 : position === 'LB' ? 3 : 1;
-      
-      for (let i = 0; i < playerCount; i++) {
-        roster.push({
-          id: `${team}-${position}-${i + 1}`,
-          name: `Player ${i + 1}`,
-          position,
-          jersey: Math.floor(Math.random() * 99) + 1,
-          age: Math.floor(Math.random() * 10) + 22,
-          experience: Math.floor(Math.random() * 8) + 1,
-          elo: Math.floor(Math.random() * 200) + 1400,
-          status: Math.random() > 0.8 ? 'Injured' : 'Active',
-          injury: Math.random() > 0.8 ? 'Knee' : null
-        });
-      }
-    });
-    
-    return roster;
-  };
+  }, [team, selectedSeason, loadTeamData]);
 
   const getPositionColor = (position) => {
     const colors = {
@@ -168,14 +106,6 @@ const TeamDetail = () => {
     }));
   };
 
-  const prepareGameChartData = () => {
-    return games.map(game => ({
-      week: `W${game.week}`,
-      points: game.teamScore,
-      opponent: game.opponentScore,
-      result: game.won ? 'W' : 'L'
-    }));
-  };
 
   const prepareRosterChartData = () => {
     const positionCounts = roster.reduce((acc, player) => {

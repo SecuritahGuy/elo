@@ -82,14 +82,33 @@ export const apiService = {
 
   // ELO Ratings endpoints
   getEloSeasons: () => api.get('/api/elo/seasons'),
-  getEloRatings: (season = 2024, config = 'comprehensive') =>
-    api.get(`/api/elo/ratings?season=${season}&config=${config}`),
+  getEloRatings: (season = 2024, config = 'comprehensive') => {
+    // Use the real API for all seasons including 2025
+    return api.get(`/api/elo/ratings?season=${season}&config=${config}`);
+  },
   getTeamEloHistory: (team, seasons = [2020, 2021, 2022, 2023, 2024]) => {
     const seasonParams = seasons.map(s => `seasons=${s}`).join('&');
     return api.get(`/api/elo/team/${team}?${seasonParams}`);
   },
-  getEloSeasonSummary: (season = 2024) =>
-    api.get(`/api/elo/season-summary?season=${season}`),
+  getEloSeasonSummary: (season = 2024) => {
+    // Use the real API for all seasons including 2025
+    return api.get(`/api/elo/season-summary?season=${season}`);
+  },
+  
+  // ELO Projections
+  getEloProjections: (season, week) => {
+    return api.get(`/api/elo/projections/${season}/${week}`);
+  },
+  getTeamEloProjections: (team, season) => {
+    return api.get(`/api/elo/projections/team/${team}/${season}`);
+  },
+  generateEloProjections: (season, currentWeek) => {
+    return api.post('/api/elo/projections/generate', {
+      season,
+      current_week: currentWeek
+    });
+  },
+  
   getEloTeamComparison: (teams, season = 2024) => {
     const teamParams = teams.map(t => `teams=${t}`).join('&');
     return api.get(`/api/elo/compare?${teamParams}&season=${season}`);
@@ -124,6 +143,19 @@ export const apiService = {
   // ELO Management endpoints
   recalculateEloRatings: () =>
     api.post('/api/elo/recalculate'),
+
+  // Live game tracking endpoints
+  getLiveGames: () => 
+    api.get('/api/live/games'),
+  
+  getLiveGame: (gameId) => 
+    api.get(`/api/live/games/${gameId}`),
+  
+  getLiveGameStats: (gameId) => 
+    api.get(`/api/live/games/${gameId}/stats`),
+  
+  getLiveGamePredictions: (gameId) => 
+    api.get(`/api/live/games/${gameId}/predictions`),
 };
 
 export default apiService;

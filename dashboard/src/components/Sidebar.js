@@ -5,7 +5,6 @@ import {
   Trophy,
   Target,
   BarChart3,
-  Settings,
   Activity,
   Users,
   Clock,
@@ -13,7 +12,9 @@ import {
   LineChart,
   AlertTriangle,
   Smartphone,
-  Monitor
+  Monitor,
+  Download,
+  Calendar
 } from 'lucide-react';
 
 const Sidebar = () => {
@@ -22,12 +23,18 @@ const Sidebar = () => {
   const navigation = [
     { name: 'Dashboard', href: '/', icon: Home },
     { name: 'Team Rankings', href: '/rankings', icon: Trophy },
+    { name: 'Weekly Schedule', href: '/schedule', icon: Calendar },
     { name: 'Team Comparison', href: '/team-comparison', icon: GitCompare },
     { name: 'ELO Visualizations', href: '/elo-visualizations', icon: LineChart },
     { name: 'Injury Data', href: '/injury-data', icon: AlertTriangle },
     { name: 'Mobile Optimizations', href: '/mobile-optimizations', icon: Smartphone },
     { name: 'Performance Monitoring', href: '/performance-monitoring', icon: Monitor },
     { name: 'Predictions', href: '/predictions', icon: Target },
+    { name: 'Prediction Analytics', href: '/prediction-analytics', icon: BarChart3 },
+    { name: 'Live Game Tracking', href: '/live-tracking', icon: Activity },
+    { name: 'Confidence Scoring', href: '/confidence-scoring', icon: BarChart3 },
+    { name: 'Historical Analysis', href: '/historical-analysis', icon: LineChart },
+    { name: 'Export Data', href: '/export', icon: Download },
     { name: 'Expert Picks', href: '/expert-picks', icon: Users },
     { name: 'Performance', href: '/performance', icon: BarChart3 },
     { name: 'Cron Status', href: '/cron-status', icon: Clock },

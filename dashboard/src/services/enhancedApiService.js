@@ -1,245 +1,195 @@
-import axios from 'axios';
-import cacheService from './cacheService';
+/**
+ * Enhanced API Service with Intelligent Caching
+ * Wraps the base API service with advanced caching capabilities
+ */
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+import apiService from './api';
+import enhancedCacheService from './enhancedCacheService';
 
-// Create axios instance
-const api = axios.create({
-  baseURL: API_BASE_URL,
-  timeout: 10000,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
-
-// Request interceptor for logging
-api.interceptors.request.use(
-  (config) => {
-    console.log(`API Request: ${config.method?.toUpperCase()} ${config.url}`);
-    return config;
-  },
-  (error) => {
-    console.error('API Request Error:', error);
-    return Promise.reject(error);
+class EnhancedApiService {
+  constructor() {
+    this.cache = enhancedCacheService;
+    this.requestQueue = new Map(); // Prevent duplicate requests
+    this.retryConfig = {
+      maxRetries: 3,
+      baseDelay: 1000,
+      maxDelay: 10000
+    };
   }
-);
 
-// Response interceptor for error handling
-api.interceptors.response.use(
-  (response) => {
-    return response;
-  },
-  (error) => {
-    console.error('API Response Error:', error);
-    return Promise.reject(error);
+  /**
+   * Generic cached request method
+   */
+  async cachedRequest(requestFunction, cacheKey, options = {}) {
+    const {
+      ttl = null,
+      forceRefresh = false,
+      retryOnError = true,
+      fallbackData = null
+    } = options;
+
+    // Check cache first (unless force refresh)
+    if (!forceRefresh) {
+      const cachedData = this.cache.get(cacheKey);
+      if (cachedData !== null) {
+        return cachedData;
+      }
+    }
+
+    // Check if request is already in progress
+    if (this.requestQueue.has(cacheKey)) {
+      return this.requestQueue.get(cacheKey);
+    }
+
+    // Create request promise
+    const requestPromise = this._executeRequestWithRetry(
+      requestFunction,
+      retryOnError,
+      fallbackData
+    );
+
+    // Store in queue to prevent duplicates
+    this.requestQueue.set(cacheKey, requestPromise);
+
+    try {
+      const data = await requestPromise;
+      
+      // Cache the result
+      this.cache.set(cacheKey, data, ttl);
+      
+      return data;
+    } catch (error) {
+      // Return fallback data if available
+      if (fallbackData) {
+        console.warn(`API request failed, using fallback data for ${cacheKey}:`, error.message);
+        this.cache.set(cacheKey, fallbackData, ttl);
+        return fallbackData;
+      }
+      throw error;
+    } finally {
+      // Remove from queue
+      this.requestQueue.delete(cacheKey);
+    }
   }
-);
 
-// Enhanced API service with caching
-export const enhancedApiService = {
-  // System status
-  getSystemStatus: () => {
-    const cacheKey = cacheService.generateKey('system', 'status');
-    const cached = cacheService.get(cacheKey);
+  /**
+   * Execute request with retry logic
+   */
+  async _executeRequestWithRetry(requestFunction, retryOnError, fallbackData) {
+    let lastError;
     
-    if (cached) {
-      console.log('Cache hit: system status');
-      return Promise.resolve({ data: cached });
+    for (let attempt = 0; attempt <= this.retryConfig.maxRetries; attempt++) {
+      try {
+        return await requestFunction();
+      } catch (error) {
+        lastError = error;
+        
+        if (!retryOnError || attempt === this.retryConfig.maxRetries) {
+          break;
+        }
+        
+        // Calculate delay with exponential backoff
+        const delay = Math.min(
+          this.retryConfig.baseDelay * Math.pow(2, attempt),
+          this.retryConfig.maxDelay
+        );
+        
+        console.warn(`API request failed (attempt ${attempt + 1}), retrying in ${delay}ms:`, error.message);
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
     }
-
-    return api.get('/api/system/status').then(response => {
-      cacheService.set(cacheKey, response.data, 2 * 60 * 1000); // 2 minutes
-      return response;
-    });
-  },
-
-  // Team data with caching
-  getTeamRankings: () => {
-    const cacheKey = cacheService.generateKey('teams', 'rankings');
-    const cached = cacheService.get(cacheKey);
     
-    if (cached) {
-      console.log('Cache hit: team rankings');
-      return Promise.resolve({ data: cached });
-    }
-
-    return api.get('/api/teams/rankings').then(response => {
-      cacheService.set(cacheKey, response.data, 5 * 60 * 1000); // 5 minutes
-      return response;
-    });
-  },
-
-  getTeamDetails: (teamId) => {
-    const cacheKey = cacheService.generateKey('team', 'details', teamId);
-    const cached = cacheService.get(cacheKey);
-    
-    if (cached) {
-      console.log('Cache hit: team details', teamId);
-      return Promise.resolve({ data: cached });
-    }
-
-    return api.get(`/api/teams/${teamId}`).then(response => {
-      cacheService.set(cacheKey, response.data, 10 * 60 * 1000); // 10 minutes
-      return response;
-    });
-  },
-
-  // ELO Ratings with intelligent caching
-  getEloSeasons: () => {
-    const cacheKey = cacheService.generateKey('elo', 'seasons');
-    const cached = cacheService.get(cacheKey);
-    
-    if (cached) {
-      console.log('Cache hit: ELO seasons');
-      return Promise.resolve({ data: cached });
-    }
-
-    return api.get('/api/elo/seasons').then(response => {
-      cacheService.set(cacheKey, response.data, 30 * 60 * 1000); // 30 minutes
-      return response;
-    });
-  },
-
-  getEloRatings: (season = 2024, config = 'comprehensive') => {
-    const cacheKey = cacheService.generateKey('elo', 'ratings', season, config);
-    const cached = cacheService.get(cacheKey);
-    
-    if (cached) {
-      console.log('Cache hit: ELO ratings', season, config);
-      return Promise.resolve({ data: cached });
-    }
-
-    return api.get(`/api/elo/ratings?season=${season}&config=${config}`).then(response => {
-      cacheService.set(cacheKey, response.data, 5 * 60 * 1000); // 5 minutes
-      return response;
-    });
-  },
-
-  getTeamEloHistory: (team, seasons) => {
-    const cacheKey = cacheService.generateKey('elo', 'team-history', team, seasons.join(','));
-    const cached = cacheService.get(cacheKey);
-    
-    if (cached) {
-      console.log('Cache hit: team ELO history', team);
-      return Promise.resolve({ data: cached });
-    }
-
-    const seasonParams = seasons.map(s => `seasons=${s}`).join('&');
-    return api.get(`/api/elo/team/${team}?${seasonParams}`).then(response => {
-      cacheService.set(cacheKey, response.data, 10 * 60 * 1000); // 10 minutes
-      return response;
-    });
-  },
-
-  getTeamComparison: (teams, season = 2024) => {
-    const cacheKey = cacheService.generateKey('elo', 'comparison', teams.join(','), season);
-    const cached = cacheService.get(cacheKey);
-    
-    if (cached) {
-      console.log('Cache hit: team comparison', teams);
-      return Promise.resolve({ data: cached });
-    }
-
-    const teamParams = teams.map(t => `teams=${t}`).join('&');
-    return api.get(`/api/elo/compare?${teamParams}&season=${season}`).then(response => {
-      cacheService.set(cacheKey, response.data, 5 * 60 * 1000); // 5 minutes
-      return response;
-    });
-  },
-
-  // Injury Data with caching
-  getTeamInjuries: (season = 2025, week = 1) => {
-    const cacheKey = cacheService.generateKey('injuries', 'teams', season, week);
-    const cached = cacheService.get(cacheKey);
-    
-    if (cached) {
-      console.log('Cache hit: team injuries', season, week);
-      return Promise.resolve({ data: cached });
-    }
-
-    return api.get(`/api/injuries/teams?season=${season}&week=${week}`).then(response => {
-      cacheService.set(cacheKey, response.data, 2 * 60 * 1000); // 2 minutes
-      return response;
-    });
-  },
-
-  getInjurySummary: (season = 2025) => {
-    const cacheKey = cacheService.generateKey('injuries', 'summary', season);
-    const cached = cacheService.get(cacheKey);
-    
-    if (cached) {
-      console.log('Cache hit: injury summary', season);
-      return Promise.resolve({ data: cached });
-    }
-
-    return api.get(`/api/injuries/summary?season=${season}`).then(response => {
-      cacheService.set(cacheKey, response.data, 5 * 60 * 1000); // 5 minutes
-      return response;
-    });
-  },
-
-  // Team Detail APIs with caching
-  getTeamRoster: (team, season = 2024) => {
-    const cacheKey = cacheService.generateKey('team', 'roster', team, season);
-    const cached = cacheService.get(cacheKey);
-    
-    if (cached) {
-      console.log('Cache hit: team roster', team, season);
-      return Promise.resolve({ data: cached });
-    }
-
-    return api.get(`/api/teams/${team}/roster?season=${season}`).then(response => {
-      cacheService.set(cacheKey, response.data, 15 * 60 * 1000); // 15 minutes
-      return response;
-    });
-  },
-
-  getTeamGames: (team, season = 2024, week = null) => {
-    const cacheKey = cacheService.generateKey('team', 'games', team, season, week);
-    const cached = cacheService.get(cacheKey);
-    
-    if (cached) {
-      console.log('Cache hit: team games', team, season, week);
-      return Promise.resolve({ data: cached });
-    }
-
-    const params = new URLSearchParams({ season });
-    if (week) params.append('week', week);
-    return api.get(`/api/teams/${team}/games?${params}`).then(response => {
-      cacheService.set(cacheKey, response.data, 10 * 60 * 1000); // 10 minutes
-      return response;
-    });
-  },
-
-  getTeamAnalysis: (team, season = 2024) => {
-    const cacheKey = cacheService.generateKey('team', 'analysis', team, season);
-    const cached = cacheService.get(cacheKey);
-    
-    if (cached) {
-      console.log('Cache hit: team analysis', team, season);
-      return Promise.resolve({ data: cached });
-    }
-
-    return api.get(`/api/teams/${team}/analysis?season=${season}`).then(response => {
-      cacheService.set(cacheKey, response.data, 20 * 60 * 1000); // 20 minutes
-      return response;
-    });
-  },
-
-  // Cache management
-  clearCache: () => {
-    cacheService.clear();
-    console.log('Cache cleared');
-  },
-
-  getCacheStats: () => {
-    return cacheService.getStats();
-  },
-
-  // Force refresh (bypass cache)
-  forceRefresh: (apiCall) => {
-    return apiCall();
+    throw lastError;
   }
-};
+
+  /**
+   * ELO Ratings with intelligent caching
+   */
+  async getEloRatings(season = 2025, config = 'comprehensive') {
+    const cacheKey = this.cache.generateKey('elo_ratings', season, config);
+    
+    return this.cachedRequest(
+      () => apiService.getEloRatings(season, config),
+      cacheKey,
+      {
+        ttl: 10 * 60 * 1000, // 10 minutes
+        fallbackData: this._getFallbackEloRatings(season)
+      }
+    );
+  }
+
+  /**
+   * Team Rankings with caching
+   */
+  async getTeamRankings(season = 2025, config = 'comprehensive') {
+    const cacheKey = this.cache.generateKey('team_rankings', season, config);
+    
+    return this.cachedRequest(
+      () => apiService.getTeamRankings(season, config),
+      cacheKey,
+      {
+        ttl: 15 * 60 * 1000, // 15 minutes
+        fallbackData: this._getFallbackTeamRankings(season)
+      }
+    );
+  }
+
+  /**
+   * Get cache statistics
+   */
+  getCacheStats() {
+    return this.cache.getStats();
+  }
+
+  /**
+   * Get cache health metrics
+   */
+  getCacheHealth() {
+    return this.cache.getHealthMetrics();
+  }
+
+  /**
+   * Clear specific cache entries
+   */
+  clearCache(pattern = null) {
+    if (pattern) {
+      // Clear entries matching pattern
+      const keysToDelete = [];
+      for (const key of this.cache.cache.keys()) {
+        if (key.includes(pattern)) {
+          keysToDelete.push(key);
+        }
+      }
+      keysToDelete.forEach(key => this.cache.delete(key));
+    } else {
+      // Clear all cache
+      this.cache.clear();
+    }
+  }
+
+  // Fallback data methods
+  _getFallbackEloRatings(season) {
+    return {
+      season,
+      config: 'comprehensive',
+      teams: [],
+      lastUpdated: new Date().toISOString(),
+      fallback: true
+    };
+  }
+
+  _getFallbackTeamRankings(season) {
+    return {
+      season,
+      config: 'comprehensive',
+      rankings: [],
+      lastUpdated: new Date().toISOString(),
+      fallback: true
+    };
+  }
+}
+
+// Create singleton instance
+const enhancedApiService = new EnhancedApiService();
 
 export default enhancedApiService;
